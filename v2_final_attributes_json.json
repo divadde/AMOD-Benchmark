@@ -1,0 +1,1728 @@
+[
+  {
+    "dataset_name": "For_Hire_Vehicles__FHV__-_Active_20251003",
+    "dataset_description": "This dataset, which includes all TLC licensed for-hire vehicles which are in good standing and able to drive, is updated every day in the evening between 4-7pm. Please check the 'Last Update Date' field to make sure the list has updated successfully. 'Last Update Date' should show either today or yesterday's date, depending on the time of day.",
+    "labels": [
+      [
+        "Active",
+        "Value Semantics",
+        "Active is a categorical (boolean-like) status flag set by the TLC indicating regulatory operational status: ‘YES’ means the vehicle’s for-hire license is current, in good standing, and the vehicle is authorized to operate; by design this dataset contains only ‘YES’ values (no nulls), and while not present here, a ‘NO’ in other contexts would indicate the vehicle is not currently authorized (e.g., expired, suspended, or otherwise inactive)."
+      ],
+      [
+        "Active",
+        "Temporal Scope",
+        "Active is a categorical status flag (here always “YES”) indicating that, at the moment of the dataset snapshot—anchored by the row’s Last Date Updated/Last Time Updated—the vehicle is currently licensed and in good standing to operate; it is not a timestamp or duration but a point-in-time operational status that should be interpreted alongside regulatory dates such as Expiration Date and may change in subsequent daily updates."
+      ],
+      [
+        "Hack Up Date",
+        "Temporal Scope",
+        "Hack Up Date denotes a single historical calendar date (a point in time) when the vehicle was first “hacked up”—i.e., initially prepared/authorized by TLC to enter for-hire service; it is not a duration or status, generally predates certification/renewal and the current license Expiration Date, remains fixed per vehicle, and is independent of the row’s daily Last Update timestamps (though it is often missing)."
+      ],
+      [
+        "Vehicle VIN Number",
+        "Value Representation",
+        "Values are 17-character uppercase alphanumeric Vehicle Identification Numbers (VINs) stored as strings, conforming to ISO 3779/3780: only A–H, J–N, P, R–Z and 0–9 are allowed (I, O, Q excluded) with no spaces or punctuation; positions 1–3 are the WMI, 4–9 the VDS (position 9 is the check digit for North American VINs), and 10–17 the VIS (model year at position 10, assembly plant at 11, and serial sequence through 17)."
+      ],
+      [
+        "Wheelchair Accessible",
+        "Value Semantics",
+        "[PRIOR_KNOWLEDGE] Wheelchair Accessible is a categorical accessibility indicator. The code ‘WAV’ designates a TLC-licensed wheelchair-accessible vehicle, while the code ‘PILOT’ refers to vehicles participating in special programs, which are subject to specific operational rules. Blank or null values indicate that the vehicle is not designated as wheelchair accessible or that the accessibility status was not reported."
+      ],
+      [
+        "Base Number",
+        "Relational Context",
+        "Base Number is the TLC-assigned identifier of the affiliated dispatch/base; it acts as a foreign-key-like field that groups many vehicle records under the same base and, within this dataset, functionally determines the base-level attributes (Base Name, Base Type, Base Telephone Number, Website, Base Address), enabling joins to external TLC base registries; it is present for all records and independent of vehicle-specific fields, and it does not convey ordering or temporal relationships."
+      ],
+      [
+        "Reason",
+        "Entity or Attribute Meaning",
+        "Reason is an attribute that records TLC’s status reason code for a vehicle’s license; here it is uniformly “G,” indicating the vehicle is in good standing and authorized to operate—the justification for its active status."
+      ],
+      [
+        "License Type",
+        "Value Semantics",
+        "License Type is a non-ordered categorical field indicating the regulatory class under which the vehicle is licensed; in this dataset it is uniformly “FOR HIRE VEHICLE,” signifying a TLC-licensed for-hire vehicle eligible to operate within the FHV program and serving chiefly as a domain-validity tag rather than an analytical discriminator; there are no numeric ranges or special codes."
+      ],
+      [
+        "Expiration Date",
+        "Temporal Scope",
+        "Expiration Date is a single calendar date (MM/DD/YYYY) that marks the terminal point-in-time through which the vehicle’s TLC for-hire license remains valid (i.e., authorization to operate is in effect up to and including this date); it is not a duration, but the end boundary of a validity period that began earlier (issuance not shown), and should be evaluated with the row’s Active flag and the Last Update Date/Last Time Updated (nightly refresh) to confirm that, as of the latest update, the license is still in good standing and to detect staleness if the date has passed without a corresponding change in Active status."
+      ],
+      [
+        "Vehicle Year",
+        "Value Representation",
+        "Vehicle Year values are unitless model-year codes stored as 64-bit integers: discrete four-digit Gregorian years (YYYY) with no separators or decimals; valid entries follow a 4-digit year schema within plausible automotive model years (observed 2004–2025 here), and the field should be treated as categorical/semi-ordinal rather than a calendar date or timestamp."
+      ],
+      [
+        "Base Type",
+        "Value Semantics",
+        "Base Type is a TLC-defined categorical label indicating the service class of the vehicle’s affiliated base (not a vehicle attribute), where BLACK-CAR denotes black car bases dispatching pre-arranged trips often via apps or corporate accounts, LIVERY denotes traditional community livery bases providing pre-arranged car service, and LUXURY denotes premium limousine/chauffeur bases offering higher-end service; there are no numeric ranges or special codes."
+      ],
+      [
+        "Last Date Updated",
+        "Temporal Scope",
+        "Last Date Updated is a calendar date stamp (MM/DD/YYYY) indicating the specific day this record was last refreshed during the daily 4–7 pm update—i.e., a point-in-time marker rather than a duration or validity interval—that should align with today or yesterday, and, when combined with Last Time Updated (time of day), pinpoints the exact refresh moment for the row and thus the as-of date for the row’s Active status and other attributes."
+      ],
+      [
+        "DMV License Plate Number",
+        "Value Representation",
+        "DMV License Plate Number values are DMV-issued identifiers stored as text: uppercase alphanumeric strings with no spaces or special characters, typically 2–9 characters long (median 8), most commonly following New York TLC-style patterns such as T + 6–7 digits + C (e.g., T101733C) but also allowing other alphanumeric combinations (e.g., RTR15)."
+      ],
+      [
+        "Last Date Updated",
+        "Value Representation",
+        "Last Date Updated is a batch-level calendar date at day granularity stored as a date-only string in US format MM/DD/YYYY (e.g., 10/02/2025), with no time or timezone component; in each daily snapshot all rows share the same non-null value, and valid values conform to the two-digit month/two-digit day/four-digit year pattern parseable as a standard date field."
+      ],
+      [
+        "Expiration Date",
+        "Relational Context",
+        "Expiration Date is a temporal attribute attached to each vehicle-operator license record (keyed by Vehicle License Number and tied to a specific VIN/Base) that marks the end of the license’s validity; it is not a foreign key and does not uniquely identify records, nor does it functionally determine other fields, but operationally it is used—when compared to “today” and validated against Active and Last Date/Time Updated—to infer current/impending compliance status and renewal priority; it organizes analyses by enabling ordering and grouping into renewal “cohorts” (e.g., by month/year) and aggregation by Base/Type to plan and monitor fleet-wide renewals."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Jobs_NYC_Postings_20251003",
+    "dataset_description": "This dataset contains current job postings available on the City of New York’s official jobs site (http://www.nyc.gov/html/careers/html/search/search.shtml). Internal postings available to city employees and external postings available to the general public are included.",
+    "labels": [
+      [
+        "# Of Positions",
+        "Value Representation",
+        "Values are non-null, unitless counts represented as whole numbers (positive integers) indicating how many vacancies are available for the job posting; they follow an integer schema (digits only, no commas or decimals), with valid values ≥1 (observed range 1–600; median 1), where 1 denotes a single opening and values >1 denote multiple openings."
+      ],
+      [
+        "Full-Time or Part-Time indicator",
+        "Value Semantics",
+        "The “Full-Time or Part-Time indicator” is a binary categorical code: F denotes a full-time position (standard NYC civil service full-time schedule, typically around 35 hours per week), and P denotes a part-time position (less than full-time or variable/limited schedule, often paid hourly); it reflects only the employment schedule classification—not exact hours or shifts—and in this dataset contains no other codes or nulls."
+      ],
+      [
+        "Career Level",
+        "Value Semantics",
+        "Career Level is a categorical indicator of role seniority and scope: Student = positions intended for current students (e.g., interns/college aides); Entry-Level = early-career roles requiring minimal prior experience; Experienced (non-manager) = mid-level individual-contributor roles without supervisory duties; Manager = roles with supervisory/people-management and/or program oversight; Executive = senior leadership roles (e.g., director/chief/commissioner-level); there are no numeric thresholds or special codes—values represent mutually exclusive seniority levels for job search clarity and do not reflect civil service title grades."
+      ],
+      [
+        "Salary Range From",
+        "Aggregation and Derivation",
+        "Directly recorded (not computed) value: it is the lower bound of the advertised pay range for the specific job posting, provided by the hiring agency, expressed per the stated Salary Frequency (annual, daily or hourly) and applying per position in that posting (not aggregated across positions, dates, or categories)."
+      ],
+      [
+        "Posting Updated",
+        "Temporal Scope",
+        "Posting Updated is a date-only timestamp marking the specific calendar day when the job posting’s details were last modified on the NYC jobs site; it represents a point in time (not a duration), typically equals the Posting Date at initial publication or a later date if changes occurred, and should chronologically fall on or after Posting Date and on or before Post Until/Process Date, indicating the version of the posting that was current as of that day."
+      ],
+      [
+        "Residency Requirement",
+        "Value Semantics",
+        "Residency Requirement is a free-text categorical field that states whether and when New York City residency is required for the job and any allowable exceptions; most values express the standard rule that appointees must establish NYC residency within 90 days of hire, with an exception that employees in certain titles who have completed two continuous years of City service may instead reside in specified neighboring NY counties (Nassau, Suffolk, Putnam, Westchester, Rockland, or Orange), while other values indicate stricter requirements (e.g., “NYC residency is required”) or waivers (e.g., “City residency is not required”); thus each value conveys the applicable residency obligation, timing, and permitted alternative counties rather than a code."
+      ],
+      [
+        "Title Code No",
+        "Value Representation",
+        "Values are NYC Civil Service Title Code Numbers (DCAS standard), stored as categorical text identifiers with no units; they follow a fixed 5-character code format that is either five digits (e.g., “13620”, “31215”, “56058”) or four digits plus an uppercase letter suffix (e.g., “1002D”), with no punctuation or spaces and leading zeros preserved; valid patterns include ^\\\\d{5}$ and ^\\\\d{4}[A-Z]$."
+      ],
+      [
+        "Salary Range To",
+        "Aggregation and Derivation",
+        "Salary Range To is a directly reported (not computed) numeric amount from each individual job posting that specifies the per-position upper bound of the advertised pay range in USD on the time basis indicated by Salary Frequency (e.g., Annual, Daily or Hourly); no aggregation or operations (sum, average, ratio) are applied to produce it, and any further metrics (e.g., range width = To − From or midpoint) would be derived downstream"
+      ],
+      [
+        "Posting Date",
+        "Temporal Scope",
+        "Posting Date is a calendar date (date-only timestamp) marking the instant a job becomes publicly posted on NYC Jobs—the start of the posting’s lifecycle; it is not a duration or status, and together with Post Until it delimits the posting’s visibility window, with Posting Updated expected to occur on or after this date and Process Date reflecting subsequent internal processing/freshness relative to it."
+      ],
+      [
+        "Post Until",
+        "Temporal Scope",
+        "Post Until is a point-in-time deadline (a specific calendar date, not a duration) marking the last day a posting is intended to accept applications; when present it serves as the valid-through boundary of the listing and, together with Posting Date, defines the application window (from Posting Date to Post Until), while null values indicate an open-ended or “until filled” status; stored as text that should be normalized to dates, it can be compared with Posting Updated and Process Date to infer whether the posting was still active at the time of data processing."
+      ],
+      [
+        "Agency",
+        "Entity or Attribute Meaning",
+        "The Agency column is a categorical attribute naming the NYC government organization (department/agency) that owns and is responsible for the job posting—i.e., the hiring authority/employer—identifying the organizational owner of each posting (not its location)."
+      ],
+      [
+        "Job Category",
+        "Value Semantics",
+        "Job Category is a nominal, taxonomy-driven label that identifies the functional domain(s) of each posting; every value names one or more domains, where a single value denotes the primary field of work and composite values—joined by commas, ampersands, or occasionally concatenated without clear separators—indicate cross-domain roles spanning multiple areas; these values do not encode seniority, status, or eligibility, have no numeric meaning or ordering, and are not hierarchical levels, but are used solely to group and compare postings by domain."
+      ],
+      [
+        "Work Location",
+        "Entity or Attribute Meaning",
+        "Work Location is an attribute of the Job Posting entity that specifies the primary real‑world place where the job is performed—recorded as free text (e.g., specific street address, facility name, neighborhood/borough, or broad designations like “All Boroughs”) to describe the position’s physical worksite or service area for geographic interpretation and filtering."
+      ],
+      [
+        "Job Category",
+        "Relational Context",
+        "Job Category is a non-null, high-cardinality categorical label that assigns each posting to a functional domain (many-to-one from posting to category); it is not an explicit foreign key and neither deterministically depends on nor determines other fields, though it aligns with Agency, Division/Work Unit, Civil Service Title, Level/Career Level and can be used to group/segment postings and their metrics (e.g., salary, location, textual qualifications) by function; note that some values concatenate multiple domains, so for stable grouping or hierarchical views it should be normalized/mapped to a controlled taxonomy rather than assumed to uniquely or exclusively define the role."
+      ],
+      [
+        "Salary Range From",
+        "Value Representation",
+        "Salary Range From is a positive numeric (float64) monetary value in U.S. dollars, recorded as a plain number without currency symbols or separators and allowing optional decimal cents (e.g., 15.5 = $15.50); its unit/timebase is determined by Salary Frequency (e.g., Annual = USD/year, Hourly = USD/hour), it denotes the lower bound of the advertised pay range (expected to be ≤ Salary Range To), contains no nulls, and is directly suitable for numeric calculations and comparisons."
+      ],
+      [
+        "Salary Range To",
+        "Value Representation",
+        "Salary Range To is a positive numeric amount (dtype float64) representing the upper bound of pay in U.S. dollars, stored as plain numbers (no currency symbols or thousand separators) with decimals allowed, and denominated by the Salary Frequency field (e.g., dollars per year for “Annual” or dollars per hour for “Hourly”); valid values are non-negative real numbers that should be greater than or equal to Salary Range From, and for cross-post comparisons they should be normalized to a common unit (e.g., annualized)."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Open_Streets_Locations_20251005",
+    "dataset_description": "New York City's Open Streets program transforms streets into public spaces open to all. These public spaces allows a variety of activities including education and cultural programming as well as building communities.",
+    "labels": [
+      [
+        "Approved On Street",
+        "Entity or Attribute Meaning",
+        "Approved On Street is an attribute of each approved street-segment record, specifying the name of the primary roadway on which the Open Streets segment operates—i.e., the on-street location (thoroughfare) approved for use between the listed “Approved From Street” and “Approved To Street” cross streets."
+      ],
+      [
+        "Approved Monday Open",
+        "Relational Context",
+        "Approved Monday Open is a per-segment, non-key time attribute that does not link to other tables/keys; it is conditionally meaningful when Monday is included in apprDaysWe and within the approval window (apprStartD–apprEndDat), and, paired with Approved Monday Close (with the implied constraint Open < Close), defines the Monday operating interval used to derive Monday duration and aggregate weekly hours, as well as to sort/compare schedules across segments—while a null value (or a value present when Monday is not in apprDaysWe) signals either “not open Monday” or a data inconsistency; it does not group or determine other fields directly, though its distribution may reflect constraints implied by Status Type."
+      ],
+      [
+        "Approved Monday Open",
+        "Value Representation",
+        "Approved Monday Open is stored as a string (object) representing a clock time-of-day in hours and minutes using a zero‑padded 24-hour format “HH:MM” (e.g., “07:00”, “14:30”), with no date or timezone attached (interpreted as local NYC time for scheduling); valid values match the pattern ^([01]\\d|2[0-3]):[0-5]\\d$ and indicate the Monday opening time within the approval window (apprStartD–apprEndDat), to be paired with Approved Monday Close for duration calculations, while null/blank values indicate the segment is not open on Monday or data is unavailable."
+      ],
+      [
+        "Approved Monday Close",
+        "Row Context",
+        "Each row represents a single approved Open Streets segment (or segment pair) managed by a specific organization, and within that context Approved Monday Close is the per-segment clock time (24-hour) at which operations end on Mondays during the approval window (apprStartD to apprEndDat)—used with Approved Monday Open to define the Monday operating interval and applicable only if Monday appears in apprDaysWe; it is a row-level, non-aggregated value that may be null when Monday is not active or the time is unreported."
+      ],
+      [
+        "apprDaysWe",
+        "Value Representation",
+        "apprDaysWe is a multi-select categorical string that lists the approved days of operation as a lowercase, comma-separated set of 3-letter English weekday codes from {mon,tue,wed,thu,fri,sat,sun} with no spaces (e.g., fri, mon,tue,wed,thu,fri, mon,tue,wed,thu,fri,sat,sun), typically ordered Monday–Sunday; valid entries follow the pattern ^(mon|tue|wed|thu|fri|sat|sun)(,(mon|tue|wed|thu|fri|sat|sun))*$, and the column contains no nulls."
+      ],
+      [
+        "Status Type",
+        "Value Semantics",
+        "Status Type is a categorical code describing the approved operating modality of an Open Streets segment: approvedFull = fully approved Open Street with full vehicular closure during the specified days/hours; approvedLimited = approved “limited-access” Open Street with managed/local vehicle access and/or narrower operating windows; approvedFullSchools = fully approved School Street (Open Streets: Schools) serving school operations, typically on weekdays during school-year hours; all values denote approved states (no pending/denied), indicating status categories rather than numeric levels or thresholds."
+      ],
+      [
+        "Shape_STLe",
+        "Value Representation",
+        "Shape_STLe contains continuous floating‑point numbers representing the geodesic length of each street segment’s MULTILINESTRING geometry in feet (NYC State Plane/US survey feet, per typical ArcGIS “Shape_Length” convention); values are positive real numbers with fractional precision (digits with optional decimal part), with no nulls, i.e., valid expressions are non‑negative decimals indicating linear distance."
+      ],
+      [
+        "segmentidf",
+        "Relational Context",
+        "segmentidf is the LION street-network SegmentID that anchors the start (“from”) of the roadway span represented by each record; paired with segmentidt (“to”) and scoped by lionversion, it serves as a foreign-key link to the external LION centerline dataset and defines the contiguous segment(s) composing the Open Street (segmentidf = segmentidt for single‑segment spans, otherwise segmentidf marks the first in sequence), thereby determining the spatial extent used to derive The_Geom and Shape_STLe and aligning with Approved On/From/To Street and Borough, while remaining independent of the schedule/temporal fields."
+      ],
+      [
+        "Approved From Street",
+        "Relational Context",
+        "Approved From Street is the cross-street name marking one endpoint of an activation and, when paired with Approved On Street, Approved To Street, and Borough Name (and aligned to The_Geom/segmentidt[f]), functions as the human-readable component of a composite location key that identifies and groups a specific street segment for an activation; it is not a standalone foreign key nor unique identifier, does not determine schedule/status/length fields, but constrains and organizes them by defining the segment’s start for mapping, ordering (“from” to “to”), aggregation by origin street."
+      ],
+      [
+        "Approved To Street",
+        "Relational Context",
+        "Approved To Street is the named cross street that marks the downstream endpoint of an activation and, together with Approved On Street, Approved From Street, and Borough Name, functions as a composite spatial locator that anchors the record to a specific street segment (aligned with The_Geom and, indirectly, segmentidt/segmentidf); it neither depends on nor determines schedules or status, and does not uniquely determine geometry or organization on its own, but it can organize analysis by corridor/terminus—provided it is paired with the corresponding From/On streets to avoid conflating distinct segments that share the same end street."
+      ],
+      [
+        "apprStartD",
+        "Temporal Scope",
+        "apprStartD is the effective start date (calendar day, no time) marking when an activation’s approval becomes valid; it defines the “valid-from” boundary of a finite approval interval paired with apprEndDat, is a point-in-time date (not a duration), and its on-street operations within that interval are further constrained by apprDaysWe and the per-day Open/Close times (with Status Type indicating scope but not the dates)."
+      ],
+      [
+        "apprEndDat",
+        "Temporal Scope",
+        "apprEndDat is a point-in-time calendar date (MM/DD/YYYY) that marks the terminal boundary of an activation’s approval interval, used together with apprStartD to define the timeframe within which the row’s scheduled days and open/close hours are valid; it is not a duration or status itself but the end timestamp of that validity window (typically the last authorized day—confirm inclusivity), and it should chronologically follow apprStartD for determining whether an activation is current, upcoming, or past."
+      ],
+      [
+        "Organization Name",
+        "Entity or Attribute Meaning",
+        "Organization Name is an entity-level attribute that records the name of the real-world organizer (e.g., school, community group, BID) responsible for planning and hosting the specific Open Streets activation/segment in the row, identifying which entity runs that activation and linking it to its schedule and location."
+      ],
+      [
+        "Approved Monday Open",
+        "Temporal Scope",
+        "Approved Monday Open is a time-of-day point (local NYC time, timezone not specified) marking when the segment’s activation begins on Mondays; it is not a timestamp or a duration but, when Monday appears in apprDaysWe and within the approval window apprStartD–apprEndDat, it pairs with Approved Monday Close to define Monday’s operating interval and aligns with the other weekday open/close fields to compose the weekly schedule, while null indicates Monday is not scheduled/approved."
+      ],
+      [
+        "Approved Monday Close",
+        "Temporal Scope",
+        "Approved Monday Close is a time-of-day (HH:MM) value that marks the endpoint of an activation’s Monday operating window—a specific point in the day, not a duration—which, together with Approved Monday Open, defines the Monday interval; it applies only on Mondays included in apprDaysWe and recurs weekly within the activation’s approval period (apprStartD–apprEndDat) for that segment/status, with nulls indicating Monday is not scheduled or not applicable."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "2018_Central_Park_Squirrel_Census_-_Squirrel_Data_20251003",
+    "dataset_description": "The Squirrel Census (https://www.thesquirrelcensus.com/) is a multimedia science, design, and storytelling project focusing on the Eastern gray (Sciurus carolinensis). They count squirrels and present their findings to the public. This table contains squirrel data for each of the 3,023 sightings, including location coordinates, age, primary and secondary fur color, elevation, activities, communications, and interactions between squirrels and with humans.",
+    "labels": [
+      [
+        "Shift",
+        "Value Semantics",
+        "Shift is a categorical time-of-day indicator for when the sighting was recorded: AM denotes the morning survey shift and PM denotes the afternoon/evening survey shift; these are the only valid codes (no special or threshold values), all records use one of them, and they represent time-period categories rather than exact clock times to distinguish the diurnal timing of observations."
+      ],
+      [
+          "Other Activities",
+          "Relational Context",
+          "Other Activities is an optional, sighting-level free-text categorical field that neither links to other tables/columns (no key/foreign-key role) nor functionally determines or is determined by other attributes; it simply augments the primary behavior flags (Running, Chasing, Climbing, Eating, Foraging) and interaction fields with additional, non-standardized behavior descriptions, and it does not inherently group, order, or structure records—though, if normalized or reduced to a presence/absence indicator, it can support ad hoc grouping in analysis."
+      ],
+      [
+          "Shift",
+          "Value Representation",
+          "Values are nominal categorical strings using the 12‑hour ante/post meridiem convention, expressed as the two uppercase tokens AM or PM (no periods, units, timezone, or finer time granularity), stored as text/object; valid values are strictly limited to AM or PM (pattern: ^(AM|PM)$), with consistent case/whitespace recommended."
+      ],
+      [
+        "Location",
+        "Entity or Attribute Meaning",
+        "Location is an attribute of each squirrel sighting event that records the animal’s positional context at the time of observation, indicating whether it was on the ground (Ground Plane) or above ground."
+      ],
+      [
+        "Above Ground Sighter Measurement",
+        "Value Representation",
+        "This attribute follows a mixed categorical convention. The value ‘FALSE’ occurs when the Location is ‘Ground Plane’. When the Location is ‘Above Ground’, the value is typically a numeric string (e.g., ‘3’, ‘10’) representing the estimated height above ground in feet, although some Above Ground cases lack a recorded value. Empty cells usually correspond to missing Location data, so valid expressions follow NULL | \"FALSE\" | [0-9]+ (feet)."
+      ],
+      [
+        "Combination of Primary and Highlight Color",
+        "Aggregation and Derivation",
+        "The 'Combination of Primary and Highlight Color' is a computed, per-sighting value derived by string-concatenating the Primary Fur Color and the Highlight Fur Color with a '+' delimiter (e.g., 'Gray+Cinnamon'), and when no highlight is recorded it uses the primary with a trailing '+' (e.g., 'Gray+'); it involves no aggregation (no sum/average/ratio), only deterministic string derivation for each individual observation."
+      ],
+      [
+        "Other Activities",
+        "Entity or Attribute Meaning",
+        "“Other Activities” is an attribute of each squirrel sighting event that records any additional observed behaviors not covered by the standard activity flags (e.g., running, chasing, climbing, eating, foraging). These may include actions such as grooming, walking, or moving slowly, providing further detail about the squirrel’s behavior at the time of observation."
+      ],
+      [
+        "Kuks",
+        "Value Semantics",
+        "Kuks is a binary observation flag for squirrel vocalizations, indicating whether a ‘kuk’ call (a short, bark-like alarm sound) was heard during the sighting. The attribute uses Boolean values only: ‘True’ when the vocalization was observed and ‘False’ when it was not. There are no special codes or missing entries."
+      ],
+      [
+        "Quaas",
+        "Value Semantics",
+        "Quaas is a binary indicator of squirrel vocalization that denotes whether a ‘quaa’ call (a drawn-out alarm or communication sound) was observed during the sighting. The attribute uses only Boolean values: ‘True’ when a quaa call was recorded and ‘False’ when none was observed, with no other codes or ranges used. There are no missing values, and all records in this dataset are marked ‘False’ (no quaa calls recorded)."
+      ],
+      [
+        "Moans",
+        "Value Semantics",
+        "Moans is a binary communication indicator showing whether a moaning vocalization was heard during the sighting. The attribute uses only Boolean values: ‘True’ if moans were observed and ‘False’ if not. No other codes or thresholds apply, and in this dataset all recorded values are ‘False’ (no moans heard)"
+      ],
+      [
+        "Runs from",
+        "Value Semantics",
+        "Runs from indicates whether the squirrel showed avoidance behavior by running away from the observer or other humans during the sighting. The attribute uses only Boolean values: ‘True’ if the behavior was observed and ‘False’ if it was not. There are no special codes or thresholds."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Civil_Service_List__Active__20251003",
+    "dataset_description": "A Civil Service List consists of all candidates who passed an exam, ranked in score order. An established list is considered active for no less than one year and no more than four years from the date of establishment.",
+    "labels": [
+      [
+        "Adj. FA",
+        "Value Representation",
+        "Adj. FA (Adjusted Final Average) is a numeric score expressed as plain decimal numbers (floating‑point) with up to two fractional digits, representing a candidate’s exam result on a 100‑point civil service scale; values may exceed 100 because statutory credits (e.g., veteran/residency/legacy) are added, so valid entries are unitless “points” written as real numbers without symbols (observed roughly 70–130 in this dataset)."
+      ],
+      [
+        "Veteran Credit",
+        "Value Semantics",
+        "Veteran Credit is a categorical indicator of veterans’ preference applied to a candidate’s ranking. When present, it contains a text label naming the credit type (either ‘Veteran’s Credit’ or ‘Disabled Veteran’s Credit’), which signifies that a veteran-related preference was granted. When null, it indicates that no veteran credit was recorded or the candidate was not eligible. There are no numeric levels or special codes; the attribute simply reflects the presence or absence of a named credit type."
+      ],
+      [
+        "Extension Date",
+        "Temporal Scope",
+        "Extension Date is a specific calendar date indicating the extended expiration (valid‑through) date of the civil service list for that row; when present it supersedes the standard Anniversary Date and marks the end of the list’s active period that began on the Established Date (thus extending the timeframe in which the candidate’s ranking/eligibility remains valid), and when null it implies no extension and the list’s active period ends at the Anniversary Date."
+      ],
+      [
+        "List Agency Code",
+        "Relational Context",
+        "List Agency Code is a categorical (coded) identifier for the agency or competition category responsible for a civil service list that functions as a foreign-key-like key to the agency description, deterministically mapping to List Agency Desc (e.g., 000 = OPEN COMPETITIVE) and thereby grouping/segmenting many candidate records across titles under the same agency; it neither orders records nor encodes temporal relationships, and it does not depend on candidate, exam, or title fields (which are instead organized by it)."
+      ],
+      [
+        "Parent Lgy Credit",
+        "Value Semantics",
+        "Parent Lgy Credit is a categorical flag indicating whether a candidate was awarded a parental legacy preference that adds credit toward their Adjusted Final Average (and thus ranking); the only observed non-null value is “Parent Legacy Credit,” meaning the credit was applied, while null indicates no such credit recorded. No other codes, levels, or numeric thresholds are used."
+      ],
+      [
+        "Residency Credit",
+        "Value Semantics",
+        "Residency Credit is a binary indicator of a residency-based preference credit that may affect a candidate’s ranking/eligibility: the only explicit value observed, “Residency Credit,” signifies the credit was granted (Yes), while blank/null indicates no residency credit recorded/awarded (not claimed or not applicable); no other codes, categories, or numeric thresholds are used."
+      ],
+      [
+        "Established Date",
+        "Temporal Scope",
+        "Established Date is a day-level timestamp marking when the eligible list for the row’s exam/title was formally established; it denotes the start of that list’s active period (policy typically up to four years), aligns with Anniversary Date as the scheduled end and with Extension Date if the period is extended, and thus—used with these fields—determines whether the candidate’s list entry is currently valid (null implies the establishment timing is not recorded)."
+      ],
+      [
+        "List Title Desc",
+        "Entity or Attribute Meaning",
+        "List Title Desc is an attribute that provides the descriptive name of the civil service position (job title) associated with a candidate’s eligibility list entry—i.e., the categorical label of the role (e.g., POLICE OFFICER, TRAIN OPERATOR) for which the exam/list applies."
+      ],
+      [
+          "List Title Desc",
+          "Row Context",
+          "Each row represents a single candidate’s placement on a specific civil service eligibility list for a given exam, agency, and role; within that context, List Title Desc is the human-readable job title for the particular list (paired with List Title Code) indicating the role under which the candidate is ranked and eligible, and it is a per-record categorical attribute, not an aggregate."
+      ],
+      [
+          "Parent Lgy Credit",
+          "Relational Context",
+          "Parent Lgy Credit is a row-level, boolean-like indicator on a candidate–list record (scoped to the same Exam No/List No/List Title/Agency) that marks eligibility for a parent legacy preference; it does not link to or reference another table/column as a key and does not determine other fields, but when present it can modify eligibility or rank within the same list in conjunction with Adj. FA (and may co-occur with other credit flags like Veteran/Residency/Sibling), making it useful for filtering/segmentation yet not for grouping or ordering by itself; it has no temporal dependency on the date fields and, given its extreme sparsity, exerts limited dataset-wide relational influence."
+      ],
+      [
+          "Residency Credit",
+          "Relational Context",
+          "Residency Credit is an optional, sparsely populated per-candidate-per-list flag that indicates a residency-based preference applies for that candidate on the specified exam/list/title/agency row; it is not a foreign key and has no referential link to other columns or tables, does not group or order records, and functions in parallel to other credit fields (Veteran/Parent/Sibling) as an independent binary indicator whose presence may conceptually affect eligibility/ranking but is not deterministically tied to Adj. FA or list position in this dataset—thus it should be used only to segment/filter rows (has credit vs not) within the list context defined by Exam No, List No, List Title, List Agency, and the list’s active dates."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Current_Reservoir_Levels_20251016",
+    "dataset_description": "Dataset containing real-time and historical water levels and reservoir volumes for multiple catchment areas in New York State.",
+    "labels": [
+      [
+        "Point_time",
+        "Temporal Scope",
+        "Point_time is the calendar date (a point-in-time timestamp at day resolution) marking when the row’s reservoir levels, volumes, releases, and flows were observed/valid, serving as the temporal key that aligns all other attributes to the same observation date (not a duration or validity period), with occasional duplicate dates indicating multiple readings within the same day."
+      ],
+      [
+        "AUGEASTLEVANALOG",
+        "Value Representation",
+        "AUGEASTLEVANALOG is a continuous numeric field (floating-point) representing the Ashokan Reservoir East Basin water-surface elevation in US customary units (feet above mean sea level), recorded to two decimal places using a period as the decimal separator (no thousands separator), with valid values observed in this dataset ranging roughly from 563 to 589 ft; the column contains no nulls and follows a simple real-number schema consistent with elevation readings."
+      ],
+      [
+        "NICCONFLW",
+        "Entity or Attribute Meaning",
+        "[PRIOR_KNOWLEDGE] NICCONFLW is an attribute: for each time-stamped observation, it records the flow rate at the NIC system’s confluence—i.e., the combined discharge where the NIC north and south flows join—expressed in the dataset’s flow units."
+      ],
+      [
+        "EDRCONFLW",
+        "Aggregation and Derivation",
+        "EDRCONFLW is a computed (not directly measured) value representing the total confluence flow for the EDR catchment at each Point_time; the aggregation is performed per catchment (EDR) per timestamp (Point_time), not across days or sites."
+      ],
+      [
+        "RECRESVOLUME",
+        "Entity or Attribute Meaning",
+        "RECRESVOLUME is an attribute that records the measured water-storage volume of the reservoir/catchment at each Point_time, describing how much water the reservoir holds at that moment (in the dataset’s volume units) within the New York State system."
+      ],
+      [
+        "WDRFLW",
+        "Value Representation",
+        "WDRFLW records the site’s flow rate as non-negative hydrologic discharge expressed in cubic feet per second (cfs), stored as a numeric value encoded as a string in fixed-point format with exactly two decimal places (period as decimal separator, no thousands separators; e.g., 0.00, 111.60, 974.90), with one value per timestamp, no nulls, and a valid pattern of ^\\\\d+\\\\.\\\\d{2}$ that can be parsed to a float.(units follow the dataset’s flow convention, typically a standard hydrologic rate such as cfs or MGD)."
+      ],
+      [
+        "EDRNTHFLW",
+        "Value Semantics",
+        "EDRNTHFLW represents the instantaneous flow/discharge rate from the East Delaware reservoir system via its north outlet (northern release), stored as a numeric value in text form; values are non‑negative decimals where 0.00 indicates no flow and any value greater than 0 indicates an active release with magnitude proportional to the number (higher value = higher flow); there are no other special codes or statuses, and the column has no missing values (units follow the dataset’s flow convention, typically a standard hydrologic rate such as cfs or MGD)."
+      ],
+      [
+        "AUGEVolume",
+        "Aggregation and Derivation",
+        "AUGEVolume is a derived, per-timestamp storage value for the reservoir’s AUG East basin; it is an instantaneous volume (not a sum/average) reported per basin at each Point_time."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Daily_Inmates_In_Custody_20251016",
+    "dataset_description": "Daily inmates in custody with attributes (custody level, mental health designation, race, gender, age, legal status, sealed status, security risk group membership, top charge, and infraction flag). This data set excludes Sealed Cases. Resulting summaries may differ slightly from other published statistics.",
+    "labels": [
+      [
+        "CUSTODY_LEVEL",
+        "Value Semantics",
+        "CUSTODY_LEVEL is an ordinal categorical security classification for an inmate at the time of the daily snapshot, where values indicate increasing supervision/restriction: MIN = minimum security (lowest custody and supervision), MED = medium security (moderate/standard custody; most common), and MAX = maximum security (highest custody and supervision for greater risk/severity); there are no other special codes or numeric thresholds, and rare nulls indicate the custody level was not recorded/assigned."
+      ],
+      [
+        "SEALED",
+        "Value Semantics",
+        "SEALED is a categorical flag indicating the case/record’s sealed status: ‘N’ = not sealed (the only value present here because the dataset excludes sealed cases); ; there are no other special codes or numeric thresholds, there are no nulls."
+      ],
+      [
+        "SRG_FLG",
+        "Value Representation",
+        "SRG_FLG is a binary categorical flag stored as a single uppercase character string with allowed values ‘Y’ or ‘N’ only (pattern: ^[YN]$), where ‘Y’ denotes Security Risk Group membership and ‘N’ denotes non-membership; the field contains no nulls and uses no other values."
+      ],
+      [
+        "INMATE_STATUS_CODE",
+        "Entity or Attribute Meaning",
+        "INMATE_STATUS_CODE is an attribute that captures each inmate’s current legal/custody status in the facility as a categorical code (with “DE” the most common), describing the inmate entity’s present standing in the correctional process at the time of the daily census."
+      ],
+      [
+        "TOP_CHARGE",
+        "Entity or Attribute Meaning",
+        "TOP_CHARGE is an attribute that describes, by statute/penal law section code (e.g., 265.03, 110-135.20), the most serious current offense charge (“top charge”) associated with each inmate’s present custody record."
+      ],
+      [
+        "INFRACTION",
+        "Value Semantics",
+        "INFRACTION is a binary flag indicating whether, as of the daily snapshot, the inmate has any recorded institutional disciplinary violation while in custody: 'Y' = one or more infractions on record; 'N' = no infractions on record; no nulls are used, and the field conveys presence/absence only (not type, count, or severity)."
+      ],
+      [
+        "ADMITTED_DT",
+        "Temporal Scope",
+        "ADMITTED_DT is a precise intake timestamp marking the moment an inmate entered custody for the current incarceration episode—i.e., a point in time that serves as the start boundary of the custody interval—which, when combined with DISCHARGED_DT (not present here, implying the interval is ongoing at the dataset’s snapshot), anchors the row temporally while the other attributes (e.g., custody level, legal status, mental health, SRG, top charge, infractions) reflect the inmate’s current state within that ongoing period rather than defining a duration themselves."
+      ],
+      [
+        "DISCHARGED_DT",
+        "Temporal Scope",
+        "DISCHARGED_DT represents a point-in-time timestamp marking when an inmate left custody (the end of the custody interval that begins at ADMITTED_DT), not a duration; when populated it should occur after ADMITTED_DT and bound the record’s validity, but in this daily in-custody snapshot it is uniformly null—indicating ongoing custody (e.g., status DE) with no discharge recorded as of the extract date."
+      ],
+      [
+        "INFRACTION",
+        "Relational Context",
+        "INFRACTION is a non-null binary flag on each in-custody snapshot row for an INMATEID indicating whether at least one disciplinary infraction occurred during the current custody period up to the snapshot; it has no referential link (no foreign key) and neither determines nor is determined by other attributes (e.g., it is distinct from TOP_CHARGE and only correlates—not dictates—with CUSTODY_LEVEL and SRG_FLG), but it serves as a grouping dimension to segment inmates (Y vs N) for behavioral/risk analyses; temporally, a Y implies an event after ADMITTED_DT and on/before the snapshot, and the value may change across snapshots as new infractions are recorded, while it does not order or hierarchically organize other data."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "DHS_Daily_Report_20251016",
+    "dataset_description": "This dataset includes the daily number of families and individuals residing in the Department of Homeless Services (DHS) shelter system and the daily number of families applying to the DHS shelter system.",
+    "labels": [
+      [
+        "Date of Census",
+        "Temporal Scope",
+        "Date of Census is a date-only field identifying the specific calendar day of the DHS daily shelter census; it functions as a point-in-time (single-day) timestamp rather than a duration, and all other attributes in the same row (e.g., counts of adults, children, single adults, families, and family applications) are the snapshot totals recorded for that same day’s reporting period, making each row a unique daily census observation."
+      ],
+      [
+        "Total Adults in Shelter",
+        "Aggregation and Derivation",
+        "Computed (derived) value: for each Date of Census, “Total Adults in Shelter” is the sum of adult subgroups in the DHS shelter system that day—Total Single Adults in Shelter + Adults in Families with Children in Shelter + Individuals in Adult Families in Shelter—aggregated across all DHS shelters for that day."
+      ],
+      [
+        "Total Children in Shelter",
+        "Aggregation and Derivation",
+        "Computed via aggregation: for each Date of Census, this column reports the daily system-wide sum of children residing in the DHS shelter system, produced by summing child counts across all DHS shelters/programs (effectively the children in families with children), aggregated per day for the entire DHS shelter system."
+      ],
+      [
+        "Families with Children in Shelter",
+        "Entity or Attribute Meaning",
+        "The “Families with Children in Shelter” column is a numerical attribute of the daily DHS shelter census, representing the number of family households (family units) with at least one child that are residing in the DHS shelter system on the given census date (a snapshot count across all shelters, not individuals)."
+      ],
+      [
+        "Adult Families in Shelter",
+        "Aggregation and Derivation",
+        "Directly observed daily census count of adult-family households (families without children) residing in the DHS shelter system, aggregated as a simple sum of such households across all DHS shelters for each Date of Census (i.e., per day, systemwide), not derived from other columns and not a ratio or average."
+      ],
+      [
+        "Individuals in Adult Families in Shelter",
+        "Aggregation and Derivation",
+        "Individuals in Adult Families in Shelter is a directly observed daily census headcount, computed as the simple sum of all persons residing in adult-family households (families without minor children) across all DHS shelters on the given date—aggregated system-wide per day (not an average or ratio) and constituting the adult-family component of Total Adults in Shelter."
+      ],
+      [
+        "Total Adults in Shelter",
+        "Row Context",
+        "Each row is a system-wide DHS shelter census snapshot for a specific date; for that date, ‘Total Adults in Shelter’ is the aggregate headcount of adults across all shelters—summing single adult men and women, adults in families with children, and adults in adult-only families (excluding children)—i.e., an aggregated total rather than a per-shelter or per-household value."
+      ],
+      [
+        "Total Children in Shelter",
+        "Row Context",
+        "Each row is a systemwide DHS shelter census snapshot for a single date, and within that snapshot the “Total Children in Shelter” value is the aggregate headcount (snapshot, not flow) of all children residing in shelters that day—entirely from families-with-children units (thus equal to “Children in Families with Children in Shelter”)—serving as the child component of the day’s total population across all shelters."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "DOB_Certificate_Of_Occupancy_20251016",
+    "dataset_description": "A Certificate of Occupancy (CO) states a building’s legal use and/or type of permitted occupancy. New buildings must have a CO, and existing buildings must have a current or amended CO when there is a change in use, egress or type of occupancy.",
+    "labels": [
+      [
+        "APPLICATION_STATUS_RAW",
+        "Value Semantics",
+        "APPLICATION_STATUS_RAW is a categorical indicator of a CO application’s disposition with one possible value: “Issued” meaning the Certificate of Occupancy has been granted (regardless of whether the ISSUE_TYPE is Temporary or Final); there are no numeric ranges, thresholds, or special codes, and nulls are not present."
+      ],
+      [
+        "ISSUE_TYPE",
+        "Entity or Attribute Meaning",
+        "ISSUE_TYPE is an attribute of each Certificate of Occupancy issuance event that classifies the nature of the CO issued for the job—indicating whether the occupancy approval is Temporary (provisional) or Final (permanent) at the time of issuance."
+      ],
+      [
+        "C_O_ISSUE_DATE",
+        "Temporal Scope",
+        "C_O_ISSUE_DATE is a date-only timestamp (MM/DD/YYYY) capturing the specific calendar day on which the Certificate of Occupancy for the given JOB_NUMBER was issued, marking the point in time when the issuance occurred—Final or Temporary as indicated by ISSUE_TYPE and aligned with APPLICATION_STATUS_RAW='Issued'—thus temporally anchoring the row’s other attributes (e.g., location and dwelling-unit counts) as of that issuance date rather than representing a duration or interval."
+      ],
+      [
+        "JOB_TYPE",
+        "Entity or Attribute Meaning",
+        "JOB_TYPE is a categorical attribute that classifies the Department of Buildings job/application associated with each Certificate of Occupancy, indicating the work type—e.g., ‘A1’ (Alteration Type 1 involving changes to use/egress/occupancy) or ‘NB’ (New Building)—and thus whether the CO pertains to a major alteration or a newly constructed building."
+      ],
+      [
+        "LATITUDE",
+        "Value Representation",
+        "LATITUDE is a floating-point numeric field expressing geographic latitude in decimal degrees under the standard WGS84/EPSG:4326 convention (units: degrees), with positive values indicating degrees north; valid values are in the global range −90 to 90 with ~5–6 decimal precision"
+      ],
+      [
+        "LONGITUDE",
+        "Value Representation",
+        "LONGITUDE is a nullable signed floating‑point field representing geographic longitude in decimal degrees under the WGS84/EPSG:4326 standard, using a period as the decimal separator and negative values for west of Greenwich (no E/W suffixes), typically recorded to about 6 decimal places; valid longitudes are in [-180, 180]."
+      ],
+      [
+        "COMMUNITY_BOARD",
+        "Relational Context",
+        "COMMUNITY_BOARD is the numeric identifier of the NYC community board district for each record’s location; it must be interpreted together with BOROUGH (the number is only unique within a borough) and is functionally derivable from the property’s geography (e.g., BOROUGH+BLOCK+LOT/BBL or LATITUDE/LONGITUDE); it groups and organizes CO records for community-district–level analysis and can serve as a join key (with BOROUGH) to external community board reference/boundary tables; it does not temporally order data and does not uniquely determine NTA or COUNCIL_DISTRICT (these have many-to-many overlaps with community boards)."
+      ],
+      [
+        "BBL",
+        "Relational Context",
+        "BBL (Borough–Block–Lot) is the NYC tax-lot identifier that functions as a parcel-level key: it is deterministically constructed from BOROUGH, BLOCK, and LOT (and encodes them, enabling their derivation), groups multiple JOB_NUMBER/CO records for the same property, supports longitudinal tracking of a lot’s COs across C_O_ISSUE_DATE, and serves as a join key to external parcel/land-use datasets (e.g., DOF/MapPLUTO) and to spatial attributes in this file (e.g., Community Board, Council District, NTA, latitude/longitude); it is distinct from BIN (building-level), with one BBL potentially covering multiple BINs and many CO records."
+      ],
+      [
+        "BIN",
+        "Value Representation",
+        "BIN values are NYC Building Identification Numbers: 7-digit integer identifiers with no units, adhering to the citywide BIN standard where the first digit 1–5 encodes the borough (1=Manhattan, 2=Bronx, 3=Brooklyn, 4=Queens, 5=Staten Island), matching the pattern ^[1-5]\\\\d{6}$; in this dataset they are stored as numeric values (often appearing as floats like 3115740.0) but should be treated as fixed-length integer codes."
+      ],
+      [
+        "COMMUNITY_BOARD",
+        "Value Semantics",
+        "COMMUNITY_BOARD is a categorical numeric code (integer stored as float) indicating the NYC Community Board (Community District) responsible for the location of the CO event; the value is the district number within the specified BOROUGH (typical valid ranges: Manhattan 1–12, Bronx 1–12, Brooklyn 1–18, Queens 1–14, Staten Island 1–3), has no ordinal or threshold meaning, and should be combined with BOROUGH to form a unique board identifier (e.g., “Brooklyn CB6”) and crosswalked to official names/boundaries; null values mean unknown/unassigned, and any rare out-of-range codes (e.g., 28) likely reflect data entry or legacy encodings and should be validated or remapped."
+      ],
+      [
+        "BIN",
+        "Relational Context",
+        "BIN is the NYC Building Identification Number that functions as the building-level key: it groups all CO records for the same property across time (via C_O_ISSUE_DATE), enables joins to other building/parcel datasets and to this table’s parcel/geography fields (e.g., BBL, address, LAT/LONG, NTA, census/governance units), and generally determines location attributes for that building (with BOROUGH implied by the BIN’s leading digit); it does not depend on other columns, may appear redundantly as BIN_NUMBER (potentially with discrepancies, so reconcile/standardize before joins), can map one-to-many against BBL, and conveys grouping rather than ordering."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "DSNY_Monthly_Tonnage_Data_20251016",
+    "dataset_description": "DSNY Monthly Tonnage Data provides monthly collection tonnages that the Department of Sanitation collects from NYC residences and institutions.",
+    "labels": [
+      [
+        "MONTH",
+        "Temporal Scope",
+        "MONTH denotes the reporting interval for each record—a specific calendar month and year (formatted “YYYY / MM”), representing the full span from the first to the last day of that month; it is not a timestamp but a one‑month time period during which the waste and recycling tonnages were collected, and all quantities in the row (by Borough and Community District) are totals aggregated for that same monthly interval."
+      ],
+      [
+        "BOROUGH",
+        "Entity or Attribute Meaning",
+        "BOROUGH identifies the New York City borough (Manhattan, Brooklyn, Queens, Bronx, or Staten Island) associated with each monthly DSNY collection record; it is a categorical attribute of the waste-collection event that specifies the administrative geographic area (the borough entity) where the recorded tonnages were collected."
+      ],
+      [
+        "COMMUNITYDISTRICT",
+        "Relational Context",
+        "COMMUNITYDISTRICT is a borough-specific district index (typically 1–18) that hierarchically nests under BOROUGH/BOROUGH_ID; it is not unique citywide and does not determine BOROUGH on its own, but in combination with BOROUGH (or BOROUGH_ID) and MONTH it defines the geographic–temporal grain of each row and thereby determines the associated tonnage measures, enabling grouping and aggregation of waste data at the community-district level within each borough."
+      ],
+      [
+        "REFUSETONSCOLLECTED",
+        "Aggregation and Derivation",
+        "REFUSETONSCOLLECTED is a directly measured weight (in tons) of non-recyclable refuse collected by DSNY, reported as the total sum of all refuse loads from residential and institutional pickups aggregated over the specified month for the given borough and community district (one summed total per MONTH–BOROUGH–COMMUNITYDISTRICT record, not an average or ratio and not derived from other columns)."
+      ],
+      [
+        "PAPERTONSCOLLECTED",
+        "Aggregation and Derivation",
+        "PAPERTONSCOLLECTED is a directly recorded operational aggregate, representing the sum (in tons) of all paper/cardboard recyclables collected by DSNY from residences and institutions during the specified MONTH, aggregated over the indicated BOROUGH and COMMUNITYDISTRICT (i.e., per month per borough–community district), and not computed from other dataset columns."
+      ],
+      [
+        "MGPTONSCOLLECTED",
+        "Aggregation and Derivation",
+        "MGPTONSCOLLECTED is a directly measured tonnage (from DSNY scale weights) representing the total amount of metal, glass, and plastic recyclables collected, calculated as the sum of all MGP loads from residential and institutional sources within the specified month and for the given borough and community district (aggregated per MONTH × BOROUGH × COMMUNITYDISTRICT), not an average or ratio."
+      ],
+      [
+        "RESORGANICSTONS",
+        "Aggregation and Derivation",
+        "RESORGANICSTONS is a direct measurement–based aggregation: it reports the monthly total tons of residential organic waste collected by DSNY, computed as the sum of scale‑weighed organics loads over all pickups within the specified month and community district (within its borough); it is a summed total (not an average or ratio) reported per month per community district, with nulls where service or reporting was not in place."
+      ],
+      [
+        "SCHOOLORGANICTONS",
+        "Aggregation and Derivation",
+        "For each month–borough–community district record, SCHOOLORGANICTONS is the directly observed tonnage of organic waste collected from schools, calculated as a sum of all DSNY school-organics pickups within the specified area over that month (a total, not an average or ratio); nulls reflect months/areas with no reported school-organics collection."
+      ],
+      [
+        "OTHERORGANICSTONS",
+        "Aggregation and Derivation",
+        "OTHERORGANICSTONS is a monthly total (sum) of the weight in tons of “other organics” collected by DSNY, aggregated from directly measured load weights across all relevant pickups during the specified month for the given borough and community district (i.e., per MONTH × BOROUGH × COMMUNITYDISTRICT record), and is not a ratio or average nor derived from other columns."
+      ],
+      [
+        "BOROUGH",
+        "Relational Context",
+        "BOROUGH is the primary spatial grouping attribute with exactly five categorical values, hierarchically organizing records by borough and their COMMUNITYDISTRICTs; it functionally determines the coded BOROUGH_ID (use BOROUGH_ID for stable joins to external geography tables) and constrains valid COMMUNITYDISTRICT values to those within the selected borough, and—when combined with MONTH—identifies the time–place scope over which all waste‐stream tonnages are measured; it does not depend on other columns but is used to filter, aggregate, and compare data at the borough level."
+      ],
+      [
+        "BOROUGH",
+        "Value Semantics",
+        "BOROUGH is a nominal categorical field that identifies the NYC borough for each monthly waste-tonnage record; its only valid values are the five borough names—Manhattan (BOROUGH_ID=1), Bronx (2), Brooklyn (3), Queens (4), and Staten Island (5)—each indicating the administrative geography to which the measurements apply; the values have no ordinal meaning, ranges, or special codes/thresholds and simply represent membership in one of these jurisdictions, enabling filtering, grouping, and aggregation by geography, with complete coverage (no missing) and stable linkage to other data via BOROUGH_ID."
+      ],
+      [
+        "SCHOOLORGANICTONS",
+        "Row Context",
+        "Each row is a monthly observation for a specific NYC borough–community district; within that context, SCHOOLORGANICTONS is the total tons of organic waste collected from schools in that district during that month—an aggregate across all school collections (not a per-school or single pickup value)—with missing entries indicating unrecorded/unknown amounts rather than zero."
+      ],
+      [
+        "OTHERORGANICSTONS",
+        "Row Context",
+        "Each row is a monthly observation for a specific NYC borough–community district pair; within that context, OTHERORGANICSTONS is the aggregate tons of “other” organic material DSNY collected in that area during that month (summed over all pickups in the period), and missing values indicate an unrecorded/unknown measurement rather than zero."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Film_Permits_20251003",
+    "dataset_description": "The Film Office issues permits to productions filming on location in New York City and provides free police assistance, free parking privileges and access to most exterior locations free of charge. Permits are generally required when asserting the exclusive use of city property, like a sidewalk, a street, or a park.",
+    "labels": [
+      [
+        "EventID",
+        "Value Representation",
+        "EventID values are unitless, system-assigned positive integer surrogate keys represented as digits only with no separators or sign (typically six digits in this dataset, e.g., 704267), stored as an integer/number rather than a date or measure, and valid expressions follow the schema “one or more decimal digits” (regex: ^\\\\d+$), with no embedded semantic meaning beyond uniquely identifying a permit."
+      ],
+      [
+        "SubCategoryName",
+        "Relational Context",
+        "SubCategoryName is a single-valued categorical sub-classification that sits hierarchically under Category (and, with EventType, refines the authorized activity), does not serve as or link to a foreign key, and primarily organizes records for filtering/grouping and reporting by production type; in practice it maps many-to-one to Category (e.g., Episodic series → Television, Feature → Film), enabling validation rules where Category constrains allowable subcategory values (with “Not Applicable” denoting no finer subdivision), but it neither orders records nor determines temporal or geographic fields."
+      ],
+      [
+        "EventType",
+        "Value Semantics",
+        "EventType is a nominal, low-cardinality text attribute (four distinct labels) that encodes the operational state of the permitted activity: “Shooting Permit” authorizes principal photography at the specified time/location; “Rigging Permit” authorizes equipment rigging/staging/strike work without principal photography; “Theater Load in and Load Outs” authorizes theater productions to move equipment in/out and use curb/sidewalk/street space around venues; and a fourth label (present in the full dataset) denotes another specific, non-shooting operational mode defined by the Film Office; there are no numeric codes, thresholds, or ordered levels—each value is a mutually exclusive activity type used to segment logistics, risk, and support requirements."
+      ],
+      [
+        "StartDateTime",
+        "Temporal Scope",
+        "StartDateTime is a point-in-time timestamp (stored as a local NYC time string) marking when the permitted on-location activity for the EventID begins; it is not a duration or status by itself, but paired with EndDateTime it bounds the permit’s active interval during which the EventType, ParkingHeld restrictions, and geographic/jurisdictional attributes apply, and it aligns with EnteredOn by enabling lead-time calculations from permit entry to start."
+      ],
+      [
+        "EndDateTime",
+        "Temporal Scope",
+        "EndDateTime is a NYC-local timestamp that marks the exact end instant of a permit’s authorized filming window; it represents a point in time (not a duration), pairs with StartDateTime to define the event’s active interval (must be on/after the start and may cross midnight or span multiple days), indicates when location access, parking holds, and city services cease, and can be compared with EnteredOn to assess administrative lead time."
+      ],
+      [
+        "EnteredOn",
+        "Temporal Scope",
+        "EnteredOn is a point-in-time administrative timestamp (stored as a text datetime) marking when the permit record was entered into the system; it is not a duration or validity period, and it should temporally precede the filming window defined by StartDateTime–EndDateTime (supporting lead-time and workflow latency calculations), though the lack of an explicit time zone and potential formatting variations mean it should be parsed and validated for sequence consistency."
+      ],
+      [
+        "EventAgency",
+        "Relational Context",
+        "EventAgency identifies the issuing authority for each permit; in this dataset it is constant (Mayor’s Office of Media & Entertainment), so it only trivially groups all rows under one agency, does not determine or depend on other attributes (e.g., dates, locations, categories) and conveys no temporal order or hierarchy."
+      ],
+      [
+        "ParkingHeld",
+        "Entity or Attribute Meaning",
+        "ParkingHeld is an attribute of the permit event that lists, in free-text, the specific NYC street/block segments (typically “street between cross streets”) where curb/parking or access is reserved/held or otherwise restricted by the permit during its active time window, often comprising multiple segments used to manage traffic and parking logistics."
+      ],
+      [
+        "Borough",
+        "Entity or Attribute Meaning",
+        "Borough is a standardized categorical attribute of each filming-permit event that specifies which of New York City’s five boroughs the permitted activity occurs in, providing the coarse administrative location used for jurisdictional context, logistics, and geographic grouping."
+      ],
+      [
+        "CommunityBoard(s)",
+        "Relational Context",
+        "CommunityBoard(s) lists the NYC Community Board district number(s) associated with a permit’s location and, when combined with Borough, can be used to join to official community district reference tables or GIS boundaries; it is often multi-valued (one permit may span multiple boards), is geographically derived from the permit’s location fields (e.g., ParkingHeld, ZipCode(s), PolicePrecinct(s)), and primarily serves to group and aggregate permits at the neighborhood-district level, but it neither uniquely identifies a record nor, by itself, functions as a strict foreign key or deterministically specifies other location attributes."
+      ],
+      [
+        "PolicePrecinct(s)",
+        "Relational Context",
+        "PolicePrecinct(s) lists the NYPD precinct code(s) covering a permit’s location, enabling grouping and aggregation of events by police jurisdiction; it aligns closely with Borough, CommunityBoard(s), and ZipCode(s) (a precinct typically lies within a single borough), but because entries can be multi-valued and boundaries can straddle areas, it neither strictly determines nor is strictly determined by those fields; it plays no temporal role or ordering function, and in a normalized design would create a one-to-many relationship from each EventID to one or more precincts rather than serving as an internal foreign key."
+      ],
+      [
+        "Category",
+        "Value Semantics",
+        "Category is a controlled, nominal taxonomy (nine named values) that identifies the high‑level production domain for each permit, with values expressed as plain text (no codes, thresholds, or ordering) and each value denoting the type of on‑location activity and its governing rules/support needs—for example: Television (TV shoots such as episodic/cable/news), Film (feature/short film shoots), Theater (stage/theatrical load‑ins/outs), Commercial (advertising/brand shoots), and Still Photography (stills/photo shoots); values are mutually exclusive per row, carry no numeric meaning, and are further refined by SubCategoryName to specify the exact activity within the chosen production domain."
+      ],
+      [
+        "SubCategoryName",
+        "Entity or Attribute Meaning",
+        "SubCategoryName is a categorical attribute of each permit event that specifies the production sub-type within the broader Category, describing the specific nature and scope of the on-location activity being authorized and informing the applicable permitting rules, city support, and logistics."
+      ],
+      [
+        "ZipCode(s)",
+        "Value Representation",
+        "ZipCode(s) is a categorical text field storing one or more USPS 5‑digit ZIP codes for the permit location; values are numeric strings (not integers) typically within NYC ZIP ranges and, when multiple apply, are provided as a comma‑separated list with optional spaces (e.g., \"10026, 10027\"), with no ZIP+4 extensions; valid entries conform to a sequence of 5‑digit codes separated by commas/optional spaces (regex: ^\\\\d{5}(?:\\\\s*,\\\\s*\\\\d{5})*$)."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Greenbook_20251016",
+    "dataset_description": "The Green Book Online is a fully searchable database which gives New Yorkers the opportunity to search for the agencies, offices, boards and commissions that keep our City running. It includes listings for all levels of New York City government, County, and the unified Courts system.",
+    "labels": [
+      [
+        "Agency Name",
+        "Entity or Attribute Meaning",
+        "Agency Name is an attribute that records the official name of the top-level NYC government organization (agency/office/board/commission) associated with the record, identifying the specific entity that contains the listed divisions, offices, and roles."
+      ],
+      [
+        "Agency Name",
+        "Value Representation",
+        "Agency Name is a non-null, human-readable categorical text field (stored as a Unicode/object string) that contains the official proper name of a NYC government entity; values are nominal labels with English capitalization and may include punctuation and qualifiers (e.g., commas, ampersands, slashes, “Department of,” “Office of,” “NYC”), with repetition across rows and no numeric units or external standard, and there is no enforced validation schema beyond being a non-empty string—so case/punctuation are significant and aliases/variants (full names vs. acronyms or reordered forms) can appear, necessitating normalization for reliable matching and aggregation."
+      ],
+      [
+        "Agency Name",
+        "Relational Context",
+        "Agency Name is the top-level identifier that establishes a many-to-one grouping of rows (offices/divisions/locations) under the same agency and serves as the de facto textual foreign key to an Agency dimension—used to join to agency-level attributes (Acronym, Website, Agency Primary Phone, Section) and to anchor the organizational hierarchy (Agency → Division → Parent/Grand Parent)—so it generally determines those agency-level fields and the set of subordinate divisions/offices but, due to alias/format inconsistencies, this determination is not strictly functional and should be normalized to a canonical AgencyID; it does not depend on other columns, nor does it impose ordering, but it organizes filtering and aggregation across the dataset."
+      ],
+      [
+        "Agency Acronym",
+        "Value Representation",
+        "Agency Acronym is a nominal, categorical text field expressed as agency-standard uppercase initialisms (e.g., CUNY, DCAS, DOHMH), sometimes in multi-token forms with an internal space to denote combined entities (e.g., HRA DSS); it has no units and follows NYC agency abbreviation conventions rather than an external code standard, with valid values typically comprising 2–10 uppercase letters (optionally separated by a single space) and usually lacking digits or punctuation; null/blank values are allowed and occur frequently, so downstream use may require normalization to a canonical set."
+      ],
+      [
+        "Agency Website",
+        "Value Representation",
+        "Agency Website values are text strings representing web addresses (URLs) for the agency’s primary online presence; they follow general URL conventions (RFC 3986) and appear as either absolute HTTP(S) URLs or bare hostnames/domains sometimes with paths and no scheme; valid expressions comprise an optional scheme (http|https), a domain or subdomain (letters, digits, hyphens, dots), and an optional path, approximately matching ^(https?://)?[A-Za-z0-9.-]+(/[^\\\\s]*)?$; hostnames are case-insensitive, www vs non-www and trailing slashes vary, duplicates across rows are allowed, and nulls (~16%) indicate no recorded website."
+      ],
+      [
+        "Office Title",
+        "Entity or Attribute Meaning",
+        "Office Title is an attribute that records the official position designation for a staff role within a specific agency/division (e.g., Commissioner, Deputy Commissioner, Director), describing the role’s hierarchical level and functional responsibility, enabling role-based identification, comparison, and aggregation across units, and persisting even when the person fields indicate the position is vacant."
+      ],
+      [
+        "Division Name",
+        "Relational Context",
+        "Division Name is the leaf-level organizational unit label that, only when interpreted with Agency Name and the ancestor fields (Parent Division, Grand Parent Division, Great Grand Parent Division), uniquely locates a role within the hierarchy; it is not a standalone foreign key, but serves as the child node to which many person/role rows can map, thereby grouping records for roll-ups and navigation by functional unit; it depends on Agency Name (and often its ancestors) for disambiguation because identical division names occur across agencies and nulls exist, and while it may be associated with unit-level attributes like Division Primary Phone and address, it does not strictly determine those fields nor imply any temporal ordering."
+      ],
+      [
+        "Parent Division",
+        "Relational Context",
+        "Parent Division is a self-referential hierarchy pointer that links a Division Name to its immediate supervisory unit (often joinable to other rows’ Division Name within the same Agency), serving as a many-to-one grouping key for hierarchical roll-ups and navigation; it is not an enforced foreign key, so referential integrity typically relies on Agency Name plus ancestor fields, with Division Name (within an Agency) generally determining its Parent Division when populated, while Parent Division alone does not determine Agency or Division and nulls denote top-level/unknown parents."
+      ],
+      [
+        "Address",
+        "Entity or Attribute Meaning",
+        "The Address column is an attribute capturing the public-facing street location of the relevant office or division within an agency (not a hierarchical identifier), describing where mail and in-person visits should be directed; it complements City, State, and Zip Code to form the full contact location, supports geography-based search and mapping, and may be shared across multiple records for co-located units."
+      ],
+      [
+        "Phone 1",
+        "Value Representation",
+        "Phone 1 values are free‑text strings representing telephone contact numbers, primarily following the North American Numbering Plan (NANP) convention as “(AAA) NNN‑NNNN” with U.S. area codes (e.g., 212, 718, 929), but may also include local service short codes (e.g., “311”) and other U.S. dialing conventions (e.g., toll‑free/vanity forms), allowing punctuation such as parentheses, spaces, and hyphens; nulls are permitted, no extensions or country codes are guaranteed, and there is no enforced uniqueness, so the implicit schema is a 10‑digit NANP number or a recognized short code stored as a string with formatting variation."
+      ],
+      [
+        "Agency Primary Phone",
+        "Relational Context",
+        "Agency Primary Phone is an agency-level contact attribute that is functionally dependent on the agency identifiers (Agency Name/Acronym/Website) and is typically repeated across all rows for that agency regardless of Division or person; it is not a key or foreign key and does not uniquely determine the agency (shared or generic numbers like 311 or agency hotlines can recur across many rows), but it can be used—preferably in combination with Agency Name—to roll up/group records at the agency level for contact routing; it complements agency address/location and sits above Division Primary Phone and individual Phone 1/2 in the contact hierarchy, without imposing ordering or temporal relationships."
+      ],
+      [
+        "Section",
+        "Entity or Attribute Meaning",
+        "Section is an attribute that assigns each agency/division/office record to a coarse, top-level geographic or functional grouping within NYC government (from a small, fixed set such as “City”), describing the broad scope in which the unit operates for high-level filtering and aggregation, and is not itself an organizational hierarchy level or event."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Harbor_Water_Quality_20251016",
+    "dataset_description": "Harbor water sampling information",
+    "labels": [
+      [
+        "Sampling Location",
+        "Entity or Attribute Meaning",
+        "Sampling Location is an attribute that serves as the entity key for the monitoring site (station) where each water-quality observation event occurred, identifying the specific harbor location via a site code (e.g., N7, H1) that maps to coordinates, depth, and site metadata, thereby providing the spatial anchor for grouping, trend analysis, and linkage to legacy/standardized station records."
+      ],
+      [
+        "Sample Date",
+        "Temporal Scope",
+        "Sample Date is the calendar day (a day-resolution timestamp) of the sampling event; when paired with Sample Time it yields the precise sampling instant, otherwise the date alone anchors the event day; it is not a duration or validity period, and it temporally governs all measurements in the row (top/bottom and method-specific) from that event, with legacy/ambiguous early-20th-century dates requiring normalization to ISO format and flagging if implausible."
+      ],
+      [
+        "Sample Time",
+        "Temporal Scope",
+        "Sample Time records the local clock time-of-day when the sampling event occurred on the specified Sample Date—representing a point-in-time (not a duration or validity window) that, when paired with Sample Date, forms the observation timestamp used to order records and align all top/bottom and method-specific measurements in the row to the same moment, though formats may vary and timezone/DST may be unspecified."
+      ],
+      [
+        "Weather Condition (Dry or Wet)",
+        "Value Semantics",
+        "Weather Condition (Dry or Wet) is a binary categorical flag describing precipitation context at the sampling event: Dry (commonly coded as D and variants such as Dry/DRY/case variants) signifies no appreciable recent precipitation, while Wet (commonly coded as W and variants such as Wet/WET) signifies precipitation during or shortly before sampling that could drive runoff; no quantitative threshold or look-back window is encoded in this field"
+      ],
+      [
+        "Top Sample Temperature (ºC)",
+        "Value Representation",
+        "Values express surface (top-layer) water temperature in degrees Celsius (°C) as continuous real numbers recorded with a period decimal separator (typically 1–2 decimal places, e.g., 23.3, 4.38); despite being currently typed as categorical due to mixed storage (numeric floats and numeric-looking strings), the valid schema is a numeric float in °C with null/NaN for missing and no unit suffixes or special codes, and plausible values constrained to natural-water ranges (approximately −2 to 40 °C)."
+      ],
+      [
+        "Bottom Sample Temperature (ºC)",
+        "Value Representation",
+        "Bottom Sample Temperature (ºC) is expressed in degrees Celsius on the SI Celsius scale and should be treated as a continuous numeric (float) value; entries are decimal numbers using a dot as the separator (often to one decimal place, e.g., 22.2), sometimes stored as numeric-looking strings, with missing values recorded as null/NaN; units are indicated by the column header (no unit text appears in cells), so valid expressions are parseable decimal numbers representing bottom-water temperature in ºC, despite some metadata misclassifying the field as categorical."
+      ],
+      [
+        "Top Salinity  (psu)",
+        "Value Representation",
+        "Top Salinity (psu) values are surface-water practical salinity on the PSS-78 scale, expressed as unitless psu and recorded as non-negative decimal numbers (typically within 0–40, estuarine ~0–35) using a period as the decimal separator; the unit is implied by the column name (not embedded in the value), and entries may be stored as floats or numeric-looking strings (or null when missing), so valid expressions conform to a single real number with ~1–2 decimal places, with no negative or nonnumeric tokens."
+      ],
+      [
+        "Bottom Salinity  (psu)",
+        "Value Representation",
+        "Bottom Salinity (psu) is expressed as a continuous numeric salinity value in practical salinity units (PSU) on the Practical Salinity Scale (PSS‑78; dimensionless), typically reported to one or two decimal places with a period as the decimal separator, expected to fall within a non‑negative estuarine–marine range (~0–40), stored as floats but sometimes present as numeric-looking strings, with blanks/NaN denoting missing data; valid entries therefore follow the pattern of non‑negative decimal numerals that should be parsed to floating‑point numbers for analysis."
+      ],
+      [
+        "CTD (conductivity, temperature, depth profiler) Top Dissolved Oxygen (mg-L)",
+        "Entity or Attribute Meaning",
+        "An attribute measuring the dissolved oxygen concentration in the surface (top) layer of the water column, recorded in mg/L by the CTD profiler at the time and location of each sampling event; it describes the surface-layer oxygen availability for that event and supports comparison with bottom DO and related CTD measurements to assess vertical structure."
+      ],
+      [
+        "CTD (conductivity, temperature, depth profiler) Bottom Dissolved Oxygen (mg-L)",
+        "Entity or Attribute Meaning",
+        "This column is an attribute that records, for each water-sampling event (site/date/time), the bottom-water dissolved oxygen concentration measured by the CTD profiler at the deepest sampled depth, expressed in mg/L; it is part of the CTD measurement stream (distinct from Winkler DO) and describes the oxygen availability near the bed to support vertical profiling and hypoxia assessment."
+      ],
+      [
+        "Light Trans (transparency) Top Sample",
+        "Value Representation",
+        "Numeric floating-point values representing surface-layer light transmission as percent (%), i.e., transmissometer-derived transparency intended to follow a 0–100% percentage scale recorded to one or two decimals (stored as numbers or numeric-like strings with nulls for missing), where valid expressions are non-negative percentages, though occasional negative entries occur and should be treated as out-of-range/calibration artifacts rather than conforming values."
+      ],
+      [
+        "Secchi Depth (ft)",
+        "Entity or Attribute Meaning",
+        "Secchi Depth (ft) is an attribute of each harbor water-sampling event that records, in feet, the visually determined depth at which a Secchi disk disappears from view at the surface station, representing water transparency/light penetration (a proxy for turbidity) and used to compare optical conditions across sites and dates and to interpret related variability in chlorophyll, dissolved oxygen, and nutrients."
+      ],
+      [
+        "Top Fecal Coliform Bacteria (Cells-100mL)",
+        "Value Semantics",
+        "Top Fecal Coliform Bacteria (Cells-100mL) stores the surface-layer fecal coliform density as a non‑negative numeric count per 100 mL (often recorded as a numeric-looking string), where higher values indicate greater fecal contamination; null means not measured; interpret the number in tandem with the companion field “Fecal Coliform Top Sample Less Than or Greater Than Result” to determine censoring (i.e., “<” = below detection at the reported value, “>” = above the countable range; if blank, treat the number as an exact result); observed values range from small integers near method detection (e.g., 1–10, with low values such as 4 common) up through hundreds, thousands, and tens of thousands, which in common water-quality practice correspond to increasing contamination levels, and any “categorical” appearance reflects storage/type issues rather than coded categories."
+      ],
+      [
+        "Bottom Fecal Coliform Bacteria (Cells-100mL)",
+        "Value Semantics",
+        "Bottom Fecal Coliform Bacteria (Cells-100mL) represents the bottom-layer concentration of fecal coliforms reported as organisms per 100 mL (typically CFU/MPN from culture-based methods), where numeric-looking values (often stored as strings) are the estimated counts (higher numbers = greater contamination; single digits ≈ at/near detection, hundreds–thousands = elevated, tens of thousands = severe)."
+      ],
+      [
+        "Current Speed (knot)",
+        "Value Representation",
+        "Values are the scalar magnitude of water current expressed in knots (nautical miles per hour), recorded as non‑negative decimal numbers commonly at tenths precision and typically stored as numeric-looking strings using a period as the decimal separator; missing entries are null, and valid values follow a simple non‑negative decimal schema suitable for casting to float for analysis."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Modified_Zip_Code_Tabulation_Areas_(MODZCTA)_20251016",
+    "dataset_description": "A shapefile for mapping data by Modified Zip Code Tabulation Areas (MODZCTA) in NYC, based on the 2010 Census ZCTA shapefile. MODZCTA are being used by the NYC Department of Health & Mental Hygiene (DOHMH) for mapping COVID-19 Data.",
+    "labels": [
+      [
+        "MODZCTA",
+        "Entity or Attribute Meaning",
+        "MODZCTA is an entity identifier: a unique numeric code for the Modified Zip Code Tabulation Area in NYC represented by each polygon."
+      ],
+      [
+        "label",
+        "Value Semantics",
+        "The label field is a display-only text identifier for map labeling: when present it is typically a 5‑digit ZCTA/ZIP code string (e.g., \"10021\") indicating the ZCTA name shown for that MODZCTA; occasionally it may contain a comma‑separated list of ZCTA codes (e.g., \"10001, 10118\") to denote a MODZCTA that aggregates multiple ZCTAs; null means no label is provided; there are no levels, thresholds, or special status codes encoded—values are purely human-readable identifiers and should not be used as join keys (use MODZCTA or ZCTA for linking)."
+      ],
+      [
+        "ZCTA",
+        "Relational Context",
+        "ZCTA is a categorical identifier that cross-references each feature to its 2010 ZIP Code Tabulation Area(s) and, in this file, is functionally equivalent to the MODZCTA key (generally one-to-one, though some records list multiple ZCTAs), so it can group and label records by ZIP and serve as a join key to external ZIP/ZCTA-based datasets, while within this dataset it effectively determines the associated geometry (the_geom) and pop_est for the feature; for DOHMH-consistent linking or when ZCTA aggregates multiple codes, prefer MODZCTA or use a crosswalk."
+      ],
+      [
+        "pop_est",
+        "Aggregation and Derivation",
+        "pop_est is a derived (not directly measured) value: the estimated total number of persons residing within each MODZCTA, computed as a sum of Census population counts from the source 2010 Census geography (e.g., ZCTAs/blocks, often areally interpolated to the modified boundaries) aggregated to the MODZCTA unit, producing one total population figure per MODZCTA."
+      ],
+      [
+        "the_geom",
+        "Value Representation",
+        "Values are OGC Simple Features–compliant Well‑Known Text (WKT) geometries of type MULTIPOLYGON, listing longitude–latitude coordinate pairs in decimal degrees within an unprojected geographic CRS consistent with the 2010 Census ZCTA source (commonly NAD83/EPSG:4269 or WGS84/EPSG:4326); valid expressions follow the schema MULTIPOLYGON (((x y, …, x y)), …) composed of closed linear rings (outer ring first, followed by any inner rings/holes)."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "New_York_City_Council_Discretionary_Funding_20251016",
+    "dataset_description": "The dataset reflects applications for discretionary funding to be allocated by the New York City Council",
+    "labels": [
+      [
+        "MOCS ID",
+        "Value Representation",
+        "MOCS ID is a non-null, immutable, opaque text primary key with the convention \"FY\" + two-digit fiscal year + single space + 4–5 digit numeric serial (often left-padded with zeros in later years), e.g., \"FY19 08796\"; it has no units or scale and should be stored as a string to preserve exact formatting, with valid values matching the pattern ^FY\\\\d{2}\\\\s\\\\d{4,5}$."
+      ],
+      [
+        "Fiscal Year",
+        "Temporal Scope",
+        "Fiscal Year denotes the NYC Council’s annual budget cycle (year) in which the funding decision/appropriation for the record occurred—serving as a reliable year-level temporal anchor rather than a precise timestamp or duration—and should be used to aggregate or filter funding activity across Source, Agency, Council Member/District, Borough, and Program, aligning with the FY prefix in MOCS ID and indicating the decision year only (not start/end or disbursement timing)."
+      ],
+      [
+        "Source",
+        "Entity or Attribute Meaning",
+        "Source is an attribute of each funding record that identifies the real-world budget funding stream or initiative from which the award originates, describing the origin of funds used to classify and track allocations across years, agencies, districts, and programs."
+      ],
+      [
+        "Borough",
+        "Relational Context",
+        "Borough is a five-category geographic label (MANHATTAN, BROOKLYN, QUEENS, BRONX, STATEN ISLAND) that groups and rolls up discretionary funding applications for borough-level analysis; it is not a foreign key, but sits atop a geography hierarchy where finer-grained fields (Community Board, Council District, NTA, Census Tract, BIN/BBL, Latitude/Longitude) should be consistent with and typically determine the Borough (e.g., BBL/CB/CD imply a unique borough), while Borough itself constrains but does not uniquely determine those fields; it does not order records temporally, and because about 22% of values are missing or inconsistently labeled (e.g., “STATEN IS”), analyses should standardize the value to canonical names or derive/validate it from the other geographic columns before cross-joining or aggregating."
+      ],
+      [
+        "Council Member",
+        "Entity or Attribute Meaning",
+        "Council Member is a categorical attribute that records the NYC Council office credited with a discretionary funding entry—typically the name of an individual council member, a leadership office (e.g., Speaker), or a delegation—representing the governing representative associated with the award and linking it to the corresponding Council District and Borough."
+      ],
+      [
+        "Legal Name of Organization",
+        "Entity or Attribute Meaning",
+        "The “Legal Name of Organization” column records the formal, legally registered name of the recipient organization for each discretionary NYC Council funding entry; it is an attribute that names the organization entity associated with the record, identifying who receives the funds and enabling attribution, aggregation, and linkage to the EIN and related funding, program, and geographic fields."
+      ],
+      [
+        "Amount ($)",
+        "Value Representation",
+        "Amount ($) represents a single award amount per record in US dollars, stored as a currency-formatted text string (typically a leading $ symbol, comma thousands separators, and two decimal places; e.g., $5,000.00), effectively categorical in the raw data; valid expressions generally follow the pattern ^\\\\$?\\\\d{1,3}(,\\\\d{3})*(\\\\.\\\\d{2})?$ (with some inconsistencies), and the intended analytical representation is a non-negative numeric decimal in USD."
+      ],
+      [
+        "Purpose of Funds",
+        "Entity or Attribute Meaning",
+        "An attribute (long-form text) attached to each discretionary funding record, Purpose of Funds represents the stated real‑world intent of the award—describing what activities or program the money will support, the target beneficiaries and expected outcomes, thereby contextualizing the funding decision for the recipient organization/program and funding stream."
+      ],
+      [
+        "Agency",
+        "Relational Context",
+        "Agency is a categorical, non-null attribute that assigns each funding record to the NYC department administering it, creating a many-to-one relationship (many awards per agency across years); it is strongly associated with Source and program domains, and functions as a primary organizing dimension to group and aggregate Amounts, compare funding across Fiscal Years and Sources, and cross-tab with Council Member/District/Borough and Program/Purpose to assess administrative pathways and jurisdictional reach."
+      ],
+      [
+        "Program Name",
+        "Entity or Attribute Meaning",
+        "Program Name is an attribute of each discretionary funding record that captures the real-world official title of the specific initiative or project within the recipient organization being funded, i.e., the program-level label that distinguishes one award’s intended initiative from others for that fiscal year, agency, and source."
+      ],
+      [
+        "Borough",
+        "Entity or Attribute Meaning",
+        "Borough is an attribute that records the New York City borough (Manhattan, Bronx, Brooklyn, Queens, or Staten Island) associated with each discretionary funding record, describing the coarse geographic locality of the recipient/program for governance and spatial analyses and enabling attribution, filtering, and aggregation of awards at the borough level."
+      ],
+      [
+        "Community Board",
+        "Relational Context",
+        "Community Board is a numeric identifier for the NYC Community District associated with each award and is used to group and map records at the community-board level; it is hierarchically subordinate to Borough (a board number is unique only within a borough), so values either depend on Borough for disambiguation when stored as 1–18 or embed the borough when coded as 1xx–5xx, and while it can be standardized to join external Community District reference/shapefiles, it neither determines nor is determined by Council District, NTA, Census Tract, or BIN/BBL."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "NYC_Wi-Fi_Hotspot_Locations_20251016",
+    "dataset_description": "NYC Wi-Fi Hotspot Locations",
+    "labels": [
+      [
+        "OBJECTID",
+        "Value Representation",
+        "OBJECTID values are non-null, unique positive integers (ArcGIS/Esri-style surrogate keys) with no units, typed as integer numeric IDs (typically 32-bit) that are assigned for internal indexing; they are usually sequential/monotonically increasing within a given extract but not semantically meaningful, may be reassigned across releases, and must satisfy the schema rule “one unique integer per record” rather than any domain-specific format."
+      ],
+      [
+        "Activated",
+        "Value Semantics",
+        "Activated is a string-encoded date field indicating a hotspot’s go-live: any valid MM/DD/YYYY value signifies the actual activation/availability date (i.e., the site is considered activated as of that date), whereas the special value 09/09/9999 is a sentinel placeholder that does not represent a real date and means the activation date is unknown or the site is not yet activated; any non-parsable or missing value (if encountered) likewise indicates unknown, so semantically the values denote two states—known activation date versus unknown/placeholder—rather than conveying ongoing operational status beyond the initial activation."
+      ],
+      [
+        "Borough",
+        "Entity or Attribute Meaning",
+        "Borough is an attribute of the hotspot entity that records the NYC borough where the site is located, encoded as a numeric code (1–5) representing the five boroughs; it describes the hotspot’s administrative geography and serves as a key for mapping to borough names/identifiers and for aggregation and joins at the borough level."
+      ],
+      [
+        "Type",
+        "Value Semantics",
+        "Type is a nominal access-policy label with three distinct categories in this dataset: “Free” denotes openly accessible, no-fee public Wi‑Fi (possibly with a portal/click-through but no payment); “Limited Free” denotes free access with constraints such as time, session, or data caps (e.g., 3 free 10‑minute sessions, as detailed in Remarks); and the third label represents a provider-defined restricted/paid model that typically requires an account or payment; there are no numeric codes or thresholds encoded in this field itself, and its values indicate non-ordinal access states to segment hotspots by user access model rather than network performance."
+      ],
+      [
+        "Provider",
+        "Entity or Attribute Meaning",
+        "The Provider column is an attribute of the Wi‑Fi hotspot entity that identifies the real-world organization or program operating and maintaining the hotspot—i.e., the network operator/brand responsible for service delivery, governance, and maintenance, which often determines access terms and SSID."
+      ],
+      [
+        "SSID",
+        "Value Semantics",
+        "SSID is a categorical, always-populated text label that records the user-visible Wi‑Fi network name broadcast at a hotspot; each distinct value denotes the branded network a user would select (e.g., LinkNYC Free Wi‑Fi for LinkNYC kiosks, TransitWirelessWiFi in subway stations, GuestWiFi commonly used by Spectrum/Altice limited‑free hotspots, and community program names such as Quensbridge Connected), and the same SSID can appear at many sites—and even across different providers—so it is not a unique site identifier; there are no numeric ranges, special codes, or thresholds inherent to SSID, and while the value can hint at access context when paired with Provider/Type/Remarks (e.g., free vs limited free), it should be treated as a nominal brand name subject to spelling/branding variation rather than a status or level."
+      ],
+      [
+        "Activated",
+        "Temporal Scope",
+        "Activated denotes a single point-in-time (activation) timestamp for when the hotspot at the given location/provider began service, stored as a date-like string; some records use a sentinel such as 09/09/9999 to indicate unknown/not-yet-activated (i.e., no valid timestamp), so it is not a duration nor a validity window and lacks a corresponding end/deactivation date—thus it temporally anchors only the start of the row’s hotspot instance (for its Provider/Type/Location) and cannot by itself establish current status, requiring placeholder values to be treated as missing in time-based analyses."
+      ],
+      [
+        "Location",
+        "Entity or Attribute Meaning",
+        "Location is an attribute of the Wi‑Fi hotspot entity that provides a human‑readable description of the physical site/context where the hotspot is deployed (e.g., street/landmark, park perimeter, station area, building lobby), complementing precise coordinates and Location_T for identification and display but not serving as a standardized or exact address."
+      ],
+      [
+        "Latitude",
+        "Value Representation",
+        "Latitude values are stored as numeric floating-point decimals in geographic decimal degrees (positive = north) consistent with a WGS84/EPSG:4326-style coordinate system; valid expressions are plain decimal numbers without symbols or thousand separators, constrained to the latitude domain (−90 to 90)."
+      ],
+      [
+        "Longitude",
+        "Value Representation",
+        "Longitude is a required numeric floating-point field in signed decimal degrees (negative for west) using the WGS84 geographic coordinate reference system (EPSG:4326), expressed as dot‑decimal values without separators; valid globally from −180 to +180"
+      ],
+      [
+        "Neighborhood Tabulation Area Code (NTACODE)",
+        "Relational Context",
+        "NTACODE is the canonical neighborhood key for each hotspot, serving as a foreign-key-style link to NYC’s official NTA reference (code–name–boundary) and thus functionally determining the companion Neighborhood Tabulation Area (NTA) name and, via its prefix (MN/BX/BK/QN/SI), the borough fields (Borough, BoroCode, Borough Name); it organizes records for neighborhood-level grouping and aggregation, enables joins to external demographic/planning datasets built on NTAs, and should be consistent both spatially with Latitude/Longitude (point-in-NTA) and hierarchically with Census Tract (tracts roll up many-to-one to an NTA), with attention to version alignment of NTA boundaries over time."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "NYCHA_Development_Data_Book_20251016",
+    "dataset_description": "Contains the main body of the Development Data Book. The Development Data Book lists all of the Authority's Developments alphabetically and includes information on the development identification numbers, program and construction type, number of apartments and rental rooms, population, number of buildings and stories, street boundaries, and political districts.",
+    "labels": [
+      [
+        "DEVELOPMENT",
+        "Entity or Attribute Meaning",
+        "The DEVELOPMENT column records the official, human-readable name of the NYCHA housing development entity that the row describes, serving as the primary label/identifier that specifies which development the record concerns and enabling cross-referencing across systems and analyses."
+      ],
+      [
+        "PROGRAM",
+        "Value Semantics",
+        "[PRIOR_KNOWLEDGE] PROGRAM is a controlled, nominal category (six values in this snapshot) that identifies the funding/ownership regime of each development: “FEDERAL” denotes traditional HUD Section 9 public housing owned/operated by the Authority (including locally originated sites later “federalized,” as indicated in FEDERALIZED DEVELOPMENT); “MIXED FINANCE/LLC2” denotes HUD mixed‑finance transactions using NYCHA’s LLC2 structure with public–private financing/operations; the remaining labels in this set similarly mark non‑federal origin programs or other mixed‑finance variants. Values are flat categories (no numeric ranges or thresholds) and should be interpreted alongside METHOD and TYPE to understand procurement and construction context and used for grouping/segmentation in analysis."
+      ],
+      [
+        "NUMBER OF CURRENT APARTMENTS",
+        "Aggregation and Derivation",
+        "NUMBER OF CURRENT APARTMENTS is a directly observed, as-of-date development-level metric representing the current active rental unit inventory; it is not a ratio or time-based computation, but rather (when sourced from unit-level data) the simple count of units flagged as active/current within that development at the snapshot date, aggregated once per development and not across any broader group."
+      ],
+      [
+        "TOTAL POPULATION",
+        "Aggregation and Derivation",
+        "Derived (aggregated) count: TOTAL POPULATION is computed as the sum of all resident counts across program types within a single development (e.g., Public Housing + Section 8 Transition, and any other applicable subgroups), producing the total number of people residing in that development for the snapshot date (per development record, not per building or time period)."
+      ],
+      [
+        "PERCENT FIXED INCOME HOUSEHOLDS",
+        "Aggregation and Derivation",
+        "Derived (not directly observed): for each development record (as of the DATA AS OF snapshot), PERCENT FIXED INCOME HOUSEHOLDS is computed as a ratio"
+      ],
+      [
+        "BOROUGH",
+        "Entity or Attribute Meaning",
+        "BOROUGH is a categorical geographic attribute of the Development entity that specifies which New York City borough the development is located in (e.g., Manhattan, Brooklyn, Queens, Bronx, Staten Island), describing its place-based and political-governance context and enabling spatial grouping, filtering, and mapping analyses."
+      ],
+      [
+        "COMMUNITY DISTIRCT",
+        "Relational Context",
+        "COMMUNITY DISTIRCT is a categorical community-district code that, hierarchically nested under BOROUGH, groups developments for district-level aggregation; it is effectively derived from the development’s spatial location (streets/borough), does not uniquely identify a row or deterministically set other political district fields, and primarily organizes records for mapping and multi-layer spatial analysis rather than implying ordering or temporal dependencies."
+      ],
+      [
+        "COMPLETION DATE",
+        "Temporal Scope",
+        "COMPLETION DATE is a point-in-time calendar date (stored as a date-time stamp with a zeroed time component) marking when a development’s construction or rehabilitation was finished; it is a fixed timestamp (not a duration or validity window) that generally predates operational and program attributes and serves as the lifecycle baseline for aligning with DATA AS OF (snapshot timing), RAD TRANSFERRED DATE, and funding/method context, with the nuance that for multi-phase projects it typically reflects the final or primary overall completion."
+      ],
+      [
+        "PRIVATE MANAGEMENT",
+        "Value Semantics",
+        "PRIVATE MANAGEMENT is a categorical governance flag indicating the operating model of a development: “YES” means the development is managed by a private property-management entity (often under RAD/PACT or other mixed‑finance/LLC structures) and thus has privately run day‑to‑day operations; null/blank values indicate Unknown/Not recorded; there are no scales or thresholds—values represent discrete statuses."
+      ],
+      [
+        "RAD TRANSFERRED DATE",
+        "Temporal Scope",
+        "RAD TRANSFERRED DATE is a single calendar date (a point-in-time effective timestamp) marking when a development transitioned into the RAD program; it does not represent a duration but denotes the start of RAD status from that date forward, and can be aligned with other lifecycle fields by occurring after the COMPLETION DATE and being compared to DATA AS OF to infer whether the transfer had taken effect by the snapshot, with null values indicating no recorded transfer as of the snapshot or missing data."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "NYPD_Arrest_Data__Year_to_Date__20251003",
+    "dataset_description": "This is a breakdown of every arrest effected in NYC by the NYPD during the current year. Each record represents an arrest and includes information about the type of crime, the location, time, and suspect demographics.",
+    "labels": [
+      [
+        "ARREST_KEY",
+        "Value Representation",
+        "ARREST_KEY is a unitless, opaque surrogate identifier represented as a 9-digit positive integer (digits 0–9 only, no separators), serving as the dataset’s primary key; values are whole-number numerics with no nulls, expected to be unique per row, observed in the range ~298704329–308855878, and they follow no external standard or embedded encoding (i.e., not sequentially meaningful, and not a date, location, or offense code)."
+      ],
+      [
+        "ARREST_DATE",
+        "Temporal Scope",
+        "ARREST_DATE is a day-level point-in-time date stamp (no time-of-day) indicating the specific calendar day in the current year when the arrest was effected; it is not a duration or validity interval, and it temporally anchors all other attributes in the row—offense, location, and suspect demographics—to that particular arrest date (distinct from when the underlying offense may have occurred)."
+      ],
+      [
+        "PD_CD",
+        "Value Representation",
+        "PD_CD is a numeric categorical identifier: values are positive whole numbers (typically 2–3 digits; observed range 12–969) with no units or decimal precision, following the NYPD’s internal PD offense code standard; valid expressions are integers drawn from this controlled code list."
+      ],
+      [
+        "PD_DESC",
+        "Entity or Attribute Meaning",
+        "PD_DESC is an attribute of each arrest event that records the NYPD’s human‑readable offense description—the police offense category describing the alleged crime for which the arrest was made—serving as a semantic label that complements OFNS_DESC and maps to the statutory LAW_CODE and LAW_CAT_CD."
+      ],
+      [
+        "LAW_CODE",
+        "Value Representation",
+        "LAW_CODE is a non-null categorical string that encodes the arrest’s statute using New York statute abbreviations—an uppercase prefix identifying the code family (e.g., PL = Penal Law, VTL = Vehicle & Traffic Law, LOC = local/ordinance) followed by a numeric payload that represents the section and subsection; values typically follow the pattern “prefix + optional space + 7 digits + optional alphanumeric suffix,” for example “PL 1552500” (~§155.25), “PL 1200501” (~§120.05(1)), “VTL0511001” (~§511.01), “LOC00000V0,” i.e., matching roughly ^[A-Z]{2,3}\\\\s?\\\\d{7}[A-Z0-9]?$, with no units and used as standardized legal identifiers rather than descriptive text."
+      ],
+      [
+        "LAW_CAT_CD",
+        "Value Semantics",
+        "[PRIOR_KNOWLEDGE] LAW_CAT_CD is a categorical statute-class code that encodes the legal severity of the arrest charge, where values represent discrete classes rather than numeric ranges: F = Felony, M = Misdemeanor (most common), V = Violation, plus two additional, rarer NYPD codes used for other statute classes (commonly traffic infractions and an other/unspecified category—confirm exact labels via the agency reference map); null/blank indicates the class was not recorded;there are no thresholds—each value denotes a distinct legal status."
+      ],
+      [
+        "AGE_GROUP",
+        "Value Semantics",
+        "AGE_GROUP is an ordinal categorical field indicating the arrestee’s age bracket at the time of arrest, using five mutually exclusive bands: “<18” (under 18 years), “18-24” (ages 18–24 inclusive), “25-44” (25–44 inclusive), “45-64” (45–64 inclusive), and “65+” (65 years and older); these values represent coarse demographic levels (not exact ages), have no special codes beyond the bracket cutoffs."
+      ],
+      [
+        "PERP_SEX",
+        "Value Semantics",
+        "PERP_SEX is a binary categorical field recording the arrestee’s sex as documented by the NYPD at the time of arrest, encoded as 'M' = male and 'F' = female; no other codes or ranges apply, the values are non-ordinal (no thresholds or levels), and they function solely as demographic labels for aggregate analysis rather than statements about gender identity."
+      ],
+      [
+        "PERP_RACE",
+        "Value Semantics",
+        "PERP_RACE is a categorical label of the arrestee’s race/ethnicity as recorded in the arrest event, with seven mutually exclusive values indicating states: BLACK (non-Hispanic Black), WHITE (non-Hispanic White), BLACK HISPANIC (Hispanic/Latino with Black racial designation), WHITE HISPANIC (Hispanic/Latino with White racial designation), ASIAN / PACIFIC ISLANDER (Asian or Pacific Islander), AMERICAN INDIAN/ALASKAN NATIVE (Native American/Alaska Native), and UNKNOWN (not recorded/undetermined); there are no numeric codes or thresholds, and UNKNOWN serves as the dataset’s “missing/unspecified” category for this field."
+      ],
+      [
+        "ARREST_PRECINCT",
+        "Relational Context",
+        "ARREST_PRECINCT is the NYPD patrol precinct code for the district of the arrest and functions as a grouping/organizing key for precinct-level analyses; it can serve as a referential link to an external precinct lookup or GIS boundary table for names and polygons, generally (per the NYPD codebook) determines the corresponding borough (ARREST_BORO) and is itself derivable from Latitude/Longitude or the New Georeferenced Column given stable boundaries, but it does not determine offense, time, or demographics; use it to aggregate, compare, and map arrests by precinct and to cross-validate geography with ARREST_BORO."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "NYPD_Hate_Crimes_20251016",
+    "dataset_description": "Dataset containing confirmed hate crime incidents in NYC",
+    "labels": [
+      [
+        "Full Complaint ID",
+        "Value Representation",
+        "An opaque, unique, digits‑only identifier represented as a fixed-length 15‑digit number (e.g., 201906713099717) with no units or embedded semantics; non-null, no signs, decimals, or separators, and valid values follow a 15‑digit pattern that may appear to include a year-like prefix but must not be parsed for time, location, or offense meaning."
+      ],
+      [
+        "Complaint Year Number",
+        "Temporal Scope",
+        "Complaint Year Number is a calendar-year period label for when the complaint was recorded (and often when the incident occurred), indicating membership in a yearly time bucket rather than a precise timestamp or duration; it aligns with Month Number to define a month–year time slice for trend/seasonality analyses, may differ from the Record Create Date due to reporting/entry lags, and should be treated as the complaint-recording year for filtering and aggregation rather than a definitive incident date."
+      ],
+      [
+        "Month Number",
+        "Temporal Scope",
+        "Month Number encodes the calendar month (1–12) in which the incident was recorded—and typically occurred—representing a month-level period rather than a timestamp or duration; it serves as the month component of the incident’s occurrence time and should be paired with Complaint Year Number to fix a specific year-month, remaining distinct from Record Create Date, which reflects when the record entered the dataset."
+      ],
+      [
+        "Complaint Precinct Code",
+        "Relational Context",
+        "Complaint Precinct Code is a categorical precinct identifier that acts as a foreign-key-style link to NYPD precinct metadata and spatial boundary layers, organizing incidents into precinct-level groups for aggregation and hotspot analysis (often in combination with Complaint Year/Month), and—via a stable precinct-to-borough/county crosswalk—implicitly determining the associated Patrol Borough Name and County within the City > Patrol Borough > Precinct hierarchy; it does not convey numeric magnitude or ordering, and mappings should be validated over time due to possible boundary/code changes."
+      ],
+      [
+        "Patrol Borough Name",
+        "Entity or Attribute Meaning",
+        "Patrol Borough Name is a closed-set categorical attribute of each hate crime incident event that identifies the NYPD patrol borough where the incident occurred, providing a coarse (borough-level) spatial context that complements precinct and county fields for geographic aggregation and comparison."
+      ],
+      [
+        "Bias Motive Description",
+        "Value Semantics",
+        "Bias Motive Description is a nominal, non-ordinal categorical label that encodes the perceived/recorded target of bias for each incident using standardized “ANTI-<group>” descriptors (e.g., ANTI-JEWISH, ANTI-ASIAN, ANTI-BLACK, ANTI-OTHER ETHNICITY, ANTI-MALE HOMOSEXUAL (GAY), ANTI-LGBT, etc.), where each value signifies bias directed at the named protected class or identity—typically mapping to higher-level groupings such as religion, race/color, ethnicity/national origin/ancestry, sexual orientation, gender identity, disability, or other groupings; values indicate the type of targeted bias (not severity, evidentiary strength, legal status, or outcome), are single-selection per record, and do not use special numeric codes or thresholds."
+      ],
+      [
+        "Offense Description",
+        "Entity or Attribute Meaning",
+        "Offense Description is an attribute of the hate crime incident event that records, in granular free-text, the specific criminal act involved, refining the high-level Offense Category and PD/Law Code by naming the precise subtype of offense committed."
+      ],
+      [
+        "Offense Category",
+        "Value Semantics",
+        "Offense Category is a curated, nominal label that indicates the protected-target domain associated with a confirmed hate crime incident (not a legal statute or severity level), mapping granular Bias Motive Description values into one of seven standardized groups observed in this dataset: Race/Color (bias against perceived racial group or skin color, e.g., Anti-Black, Anti-Asian), Religion/Religious Practice (bias against a faith or religious practice, e.g., Anti-Jewish, Anti-Muslim), Ethnicity/National Origin/Ancestry (bias against ethnic/national/ancestral background, e.g., Anti-Other Ethnicity), Sexual Orientation (bias against actual or perceived sexual orientation, e.g., Anti-Gay/Lesbian/Bisexual), Gender (bias against male/female gender), Gender Identity/Expression (bias against transgender/non-binary identity or gender expression), and Disability (bias against physical or mental disability); values are categorical with no ordering, thresholds, or special/unknown codes (nulls are 0%)."
+      ],
+      [
+        "Arrest Id",
+        "Value Representation",
+        "Arrest Id values are optional alphanumeric identifiers stored as strings with no units, typically formatted as a fixed nine-character code comprising one uppercase letter followed by eight digits (commonly K/M/Q/B/S then eight digits; e.g., pattern A–Z + 8 numerals, no spaces or hyphens), with about 56% nulls."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "NYPD_Shooting_Incident_Data_(Historic)_20251016",
+    "dataset_description": "List of every shooting incident that occurred in NYC going back to 2006 through the end of the previous calendar year. Each record represents a shooting incident in NYC and includes information about the event, the location and time of occurrence, and suspect and victim demographics.",
+    "labels": [
+      [
+        "INCIDENT_KEY",
+        "Entity or Attribute Meaning",
+        "INCIDENT_KEY is a numeric primary key that uniquely identifies each real-world shooting incident event in NYC (one row per incident, spanning 2006 through the most recently completed year) and serves solely as the stable incident identifier used to link all associated date/time, location, demographic, and outcome attributes across joins, deduplication, and analyses; it conveys no intrinsic temporal or spatial meaning beyond this identity."
+      ],
+      [
+        "INCIDENT_KEY",
+        "Relational Context",
+        "INCIDENT_KEY is the dataset’s primary key: a unique, non-null numeric identifier for each shooting incident that functionally determines all other columns on its row, does not encode or depend on time or location, does not act as a foreign key to any other in-table field, and serves to group all attributes of the same event (there are some entries where for the same INCIDENT_KEY in the other columns there are different values), and maintain referential integrity without implying chronological order."
+      ],
+      [
+        "OCCUR_DATE",
+        "Temporal Scope",
+        "OCCUR_DATE is a date-only stamp (MM/DD/YYYY) marking the specific calendar day—interpreted in NYC/Eastern local time—on which the shooting incident occurred; it represents a point in time at day granularity (not a duration or status), and when paired with OCCUR_TIME it composes the precise event timestamp that temporally anchors the row and aligns all other attributes (location, demographics, outcome) to that occurrence."
+      ],
+      [
+        "OCCUR_TIME",
+        "Temporal Scope",
+        "OCCUR_TIME records the incident’s local NYC time-of-day in HH:MM:SS, representing a single point-in-time (not a duration or validity period) that, when combined with OCCUR_DATE, forms the full occurrence timestamp for the event in that row and serves solely as the time component aligned to that date, not as a reporting or update time."
+      ],
+      [
+        "BORO",
+        "Entity or Attribute Meaning",
+        "BORO is an attribute of each shooting incident event that identifies the administrative borough of New York City in which the incident occurred, using one of the five canonical borough names (Bronx, Brooklyn, Manhattan, Queens, Staten Island) to provide a standardized, coarse geographic category for borough-level aggregation, comparison, and spatial joins."
+      ],
+      [
+        "LOC_OF_OCCUR_DESC",
+        "Entity or Attribute Meaning",
+        "LOC_OF_OCCUR_DESC is an attribute of the shooting incident event that indicates the incident’s immediate environmental setting—classifying whether it occurred indoors or outdoors—via categorical values (e.g., INSIDE, OUTSIDE), providing coarse, optional context rather than a precise place type and often being missing."
+      ],
+      [
+        "PRECINCT",
+        "Relational Context",
+        "PRECINCT is a categorical identifier for the NYPD patrol precinct in which the incident occurred; functionally determines BORO (each precinct maps to exactly one borough) enabling rollups from precinct to borough, and groups/partitions incidents for precinct-level aggregation, hotspotting, and resource-allocation analyses; while stored numerically it is not a measure and does not determine precise coordinates or time, but coordinates/Lat–Long should spatially fall within the precinct polygon (useful for validation or deriving precinct from location), and longitudinal analyses should account for any historical precinct boundary changes when joining or comparing across years."
+      ],
+      [
+        "JURISDICTION_CODE",
+        "Value Semantics",
+        "[PRIOR_KNOWLEDGE] JURISDICTION_CODE is a nominal (non-ordinal) categorical label, stored as a numeric-like code, that identifies the agency/jurisdiction responsible for the incident: 0 = NYPD patrol/precinct jurisdiction (general city locations), 1 = NYPD Transit jurisdiction (subway/transit system), 2 = NYPD Housing jurisdiction (NYCHA/public housing areas), with nulls indicating unknown/not recorded; these codes are purely identifiers (not magnitudes or ranges) and should be mapped to readable names and used for grouping or jurisdiction-level joins."
+      ],
+      [
+        "LOCATION_DESC",
+        "Entity or Attribute Meaning",
+        "LOCATION_DESC is a categorical attribute of each shooting incident that describes the immediate place type where the event occurred (e.g., multi-dwelling public housing, apartment building, private house, grocery/bodega, school), providing contextual residential/commercial/institutional scene information about the incident rather than precise geolocation; many records may lack this value."
+      ],
+      [
+        "STATISTICAL_MURDER_FLAG",
+        "Value Semantics",
+        "STATISTICAL_MURDER_FLAG is a binary, incident-level outcome indicator where True denotes a fatal shooting classified as a murder (i.e., at least one homicide associated with the incident) and False denotes a non-fatal shooting with no homicide recorded; there are exactly two values with no special codes or thresholds and no missing values expected, and the field represents the incident’s lethality status per the dataset’s reporting conventions (a categorical state, not a numeric measure)."
+      ],
+      [
+        "PERP_SEX",
+        "Value Semantics",
+        "PERP_SEX is a nominal categorical descriptor of the recorded sex of the perpetrator for the incident: M = male, F = female, U = unknown/undetermined/not reported, and null/blank (e.g., “(null)”) = missing; there are no numeric ranges or ordered levels, values represent states (not outcomes or verified gender identity)."
+      ],
+      [
+        "PERP_RACE",
+        "Value Semantics",
+        "PERP_RACE is a categorical attribute denoting the recorded race/ethnicity of the alleged perpetrator for the incident, with values representing identity categories rather than numeric levels: BLACK (non-Hispanic Black/African American), WHITE (non-Hispanic White), WHITE HISPANIC (Hispanic/Latine of white race), BLACK HISPANIC (Hispanic/Latine of black race), ASIAN/PACIFIC ISLANDER, and AMERICAN INDIAN/ALASKAN NATIVE; UNKNOWN indicates the race was not known or not reported, while the literal string “(null)” and actual nulls likewise signify missing/unspecified values and should be treated as unknown; there are no special numeric codes or thresholds, and labels reflect police-recorded classifications that may not be self-identified."
+      ],
+      [
+        "VIC_SEX",
+        "Value Semantics",
+        "VIC_SEX is a nominal, non-ordinal code for the victim’s sex in each incident, with exactly three allowable values—M = male, F = female, and U = unknown/unreported—where U is an explicit placeholder used instead of nulls; no numeric ranges, thresholds, or levels are implied, the field reflects police-recorded sex (not gender identity)."
+      ],
+      [
+        "VIC_RACE",
+        "Value Semantics",
+        "VIC_RACE is a non-null categorical text field indicating the victim’s recorded race/ethnicity for each incident; it has no numeric meaning or ordering and consists of mutually exclusive labels: BLACK and WHITE denote non-Hispanic race groups unless “HISPANIC” is explicitly specified; WHITE HISPANIC and BLACK HISPANIC indicate Hispanic ethnicity with race identified as White or Black, respectively; ASIAN / PACIFIC ISLANDER aggregates Asian and Pacific Islander groups; AMERICAN INDIAN/ALASKAN NATIVE denotes Native American/Alaska Native; UNKNOWN means the victim’s race/ethnicity was not reported or could not be determined; there are no special codes or thresholds beyond these textual categories."
+      ],
+      [
+        "Latitude",
+        "Value Representation",
+        "Latitude is a float64 numeric coordinate expressed in decimal degrees under the WGS84/EPSG:4326 convention, using a dot decimal and positive-north sign; valid values are real numbers in the range −90 to 90, may be null, and are intended to pair with Longitude and match the latitude component of the Lon_Lat POINT geometry—no unit conversion required, with precision to several decimal places."
+      ],
+      [
+        "Longitude",
+        "Value Representation",
+        "Longitude is a float64 numeric field expressing geographic longitude in decimal degrees (WGS84/EPSG:4326) with a dot decimal format and no symbols, using the standard convention that west of the Prime Meridian is negative; valid values are real numbers (nullable) that should fall within −180 to 180, aligning with the paired Latitude and the Lon_Lat WKT schema “POINT (lon lat)” for geospatial joins and mapping."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "TLC_Approved_LabCorp_Patient_Services_Drug_Test_Locations_20251016",
+    "dataset_description": "List of TLC approved LabCorp Drug Test Locations across New York City.",
+    "labels": [
+      [
+        "Address",
+        "Entity or Attribute Meaning",
+        "The Address column is an attribute that records the real-world street address (often including suite/floor details) of the physical drug testing site entity, describing the exact on-site location where services are provided and acting as the primary human-readable locator that, in conjunction with City/State, Borough, Postcode, and coordinates, anchors each site within NYC’s regulatory geography and supports geocoding, mapping, and navigation."
+      ],
+      [
+        "City",
+        "Entity or Attribute Meaning",
+        "City is an attribute of the testing site (location) that records the human-readable locality where the site is situated—typically an NYC borough or neighborhood name, though it can include non‑NYC places—serving primarily for display and coarse locality-based filtering rather than a strict administrative city identifier."
+      ],
+      [
+        "State",
+        "Value Semantics",
+        "State is a categorical field holding USPS two-letter state abbreviations that specify the jurisdiction of each site; in this dataset the possible values are NY (New York State) and NJ (New Jersey), where NY denotes a New York State location (a necessary but not sufficient condition for being within NYC—validate with Borough/City/ZIP/coordinates) and NJ indicates an out-of-scope location for a NYC TLC list; there are no special codes, thresholds, or numeric meanings."
+      ],
+      [
+        "Postcode",
+        "Value Representation",
+        "Postcode values are USPS ZIP Codes—categorical postal identifiers, in this dataset they are stored as numeric floats (e.g., 7087.0 representing 07087), which strips leading zeros; valid entries are U.S. ZIPs (primarily NYC ranges though some non‑NYC ZIPs appear), with nulls allowed."
+      ],
+      [
+        "Latitude",
+        "Value Representation",
+        "Latitude is a numeric floating-point field (float64) storing the site’s north–south position in decimal degrees using the WGS84/EPSG:4326 convention, expressed as a signed decimal number between −90 and 90 (positive = north), typically with up to ~6 fractional digits and no unit symbols; null denotes missing, and the value is intended to be used in tandem with Longitude to form a valid coordinate pair."
+      ],
+      [
+        "Longitude",
+        "Value Representation",
+        "Longitude values are recorded as numeric float64 decimal degrees (units: degrees) in the WGS84/EPSG:4326 coordinate system, using the standard convention of negative values for west longitudes and typically expressed to 5–6 decimal places; valid entries must be numeric within −180 to 180 (or null when missing), not degrees‑minutes‑seconds text."
+      ],
+      [
+        "Borough",
+        "Entity or Attribute Meaning",
+        "Borough is an attribute of the testing location entity that specifies which New York City borough (Manhattan, Brooklyn, Queens, the Bronx, or Staten Island) the site is located in, enabling borough-level filtering, aggregation, and linkage to local governance geographies; values may be null or non-standard and thus require normalization and NYC-scope validation."
+      ],
+      [
+        "Community Board",
+        "Relational Context",
+        "Community Board is a numeric district code that groups locations by NYC community board and serves as a foreign-key–like reference to external lookup or spatial layers (to obtain official board names and boundaries); within this dataset it does not link to another column directly, but when populated it functionally determines and should validate the Borough (the leading digit encodes borough: 1=Manhattan, 2=Bronx, 3=Brooklyn, 4=Queens, 5=Staten Island), while only correlating spatially (not determining) Council District, NTA, or Census Tract; it is typically null for out-of-scope (non‑NYC) or incomplete rows, and is used primarily to filter and aggregate sites by local governance area rather than to order or sequence records."
+      ],
+      [
+        "Council District",
+        "Relational Context",
+        "Council District is a categorical numeric code (intended 1–51) that, when present, links each NYC site to exactly one City Council district, acting as a many-to-one grouping key for aggregations and filtering and as a referential key to external NYC Council District boundary/lookup datasets; its value is derived from the site’s geospatial location (address or lat/long) and should be consistent with Borough, Community Board, Census Tract, and NTA layers but neither determines nor is determined by them due to overlapping geographies; it is not a unique identifier for sites, and null or out-of-range values generally indicate non-NYC rows or unresolved geocoding that should be validated or imputed before district-level analyses."
+      ],
+      [
+        "BIN",
+        "Relational Context",
+        "BIN is an optional, NYC-issued building identifier that serves as a non-spatial cross-reference key: it links this record to external NYC property/licensing/tax/permit datasets—often alongside BBL—and can help validate consistency with NYC geography fields (Borough, Community Board, Council District, Census Tract), but it neither determines nor is determined by the address or coordinates in this table; it may be used to group multiple rows that pertain to the same building, yet it introduces no ordering or hierarchy and is null for out-of-scope (non-NYC) locations."
+      ],
+      [
+        "BBL",
+        "Relational Context",
+        "BBL is the NYC Borough–Block–Lot parcel key, inherently encodes and can validate the Borough, and—via joins—can deterministically derive parcel-level governance attributes (Community Board, Council District, Census Tract, NTA) and enable linkage to property/BIN records; within this table it can group multiple sites on the same parcel, has no ordering or temporal role, and is null for non‑NYC rows where other location fields must be used instead."
+      ],
+      [
+        "Census Tract",
+        "Entity or Attribute Meaning",
+        "The Census Tract column is an attribute of each testing location, representing the U.S. Census Bureau tract code for the specific tract containing the site; it identifies the neighborhood-scale census geography (distinct from ZIP codes) and serves as a key to join the location to demographic/economic/housing datasets and validate its spatial context within NYC governance boundaries."
+      ],
+      [
+        "NTA",
+        "Entity or Attribute Meaning",
+        "NTA is an attribute that records the official NYC Neighborhood Tabulation Area (NTA) code for each site, identifying the neighborhood-level planning geography in which the testing location sits and enabling linkage to NYC demographic/planning data and neighborhood-based filtering or aggregation."
+      ],
+      [
+        "Data as of Date",
+        "Temporal Scope",
+        "“Data as of Date” is a point-in-time snapshot date (a timestamp, not a duration) indicating when the entire record’s attributes—location details, geographic/administrative fields, and approval status—were considered current."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "SARS-CoV-2_concentrations_measured_in_NYC_Wastewater_20251016",
+    "dataset_description": "Results of sampling to determine the SARS-CoV-2 N gene levels in NYC DEP Wastewater Resource Recovery Facilities (WRRFs). Each record includes the sampling and testing dates, facility name, and concentration measures.",
+    "labels": [
+      [
+        "Sample Date",
+        "Temporal Scope",
+        "Sample Date is a day-level timestamp denoting the specific calendar date when the wastewater sample was collected at a WRRF (a point-in-time event, not a duration), serving as the primary temporal anchor for the row so that the measured Concentration and Per-capita Load are interpreted as of that collection date; it should logically precede or coincide with the Test date (analysis date) and is the basis for temporal alignment and aggregation across facilities and over time."
+      ],
+      [
+        "Test date",
+        "Temporal Scope",
+        "Test date is a day-level timestamp indicating the specific calendar date on which the laboratory analysis was performed—i.e., a single point-in-time event (not a duration or validity period)—that typically follows the Sample Date and enables calculation of collection-to-analysis lag and consistent temporal alignment of results across facilities and technologies for time-series comparisons."
+      ],
+      [
+        "WRRF Name",
+        "Entity or Attribute Meaning",
+        "WRRF Name is a categorical entity identifier that provides the official name of the NYC DEP Wastewater Resource Recovery Facility associated with each sample/measurement, defining the spatial unit of observation and serving as the stable label for linking facility-level metadata (e.g., population served, technology) and enabling facility-level and cross-facility longitudinal analyses."
+      ],
+      [
+        "WRRF Abbreviation",
+        "Value Representation",
+        "WRRF Abbreviation values are unitless categorical identifiers stored as uppercase alphanumeric strings, typically 2–3 characters, drawn from a closed set of 14 NYC DEP facility codes (e.g., WI, 26W, BB, CI, HP), with no nulls; they are case-sensitive, have no numeric magnitude, and valid expressions follow the pattern ^[A-Z0-9]{2,3}$ and must belong to the predefined code list, serving as the stable join key mapping 1:1 to a single WRRF across all dates and technologies."
+      ],
+      [
+        "Concentration SARS-CoV-2 gene target (N1 Copies-L)",
+        "Entity or Attribute Meaning",
+        "An attribute (numeric measurement) recording the laboratory-measured concentration of the SARS-CoV-2 N1 gene in wastewater—expressed as genome copies per liter—for the specific WRRF and Sample Date, as measured by the indicated technology, representing the raw per-liter viral signal for that sampling event used to assess community-level viral activity."
+      ],
+      [
+        "Concentration SARS-CoV-2 gene target (N1 Copies-L)",
+        "Value Representation",
+        "Values represent the measured concentration of the SARS‑CoV‑2 N1 gene target as genome copies per liter of wastewater (copies/L); they are stored as text-formatted decimal numbers using a period for the decimal separator and optional comma thousands separators (e.g., “50,297.14”), contain no unit symbols in the field, and should be parsed as non-negative floating-point values after removing separators; valid entries follow a numeric pattern of digits optionally grouped by thousands (commas) and an optional fractional part (i.e., digits[,[ddd]]…[.digits]), with interpretive qualifiers (e.g., below detection/quantification) conveyed via the Annotation field rather than the numeric format."
+      ],
+      [
+        "Per capita SARS-CoV-2 load (N1 copies per day per population)",
+        "Aggregation and Derivation",
+        "Computed (derived), not directly measured: for each WRRF facility on a given sample date, the per-capita load is calculated by estimating the facility’s total daily N1 gene copies (e.g., measured concentration in copies per liter multiplied by daily wastewater flow to form a daily sum/load) and dividing that value by the facility’s estimated population served, yielding a ratio in copies per day per person for cross-facility, per-day comparison."
+      ],
+      [
+        "Annotation",
+        "Value Semantics",
+        "Annotation is a free-text quality/status field that indicates how a measurement was obtained or constrained rather than a value itself; its values map to QC contexts such as replicate handling (e.g., “This sample was analyzed in duplicate” = two technical replicates were run; “...the higher of the 2 results is reported” = the maximum of the replicates was used), method-threshold qualifiers (e.g., “Concentration below Method Limit of Quantification (above Method Limit of Detection)” = target detected but below the quantifiable range, a low-confidence positive; “Concentration below Method Limit of Detection” = non-detect/trace at or below LOD, interpret with caution; extended notes may specify well-level behavior like “no signal in 2 of 3 RT-qPCR wells, result obtained by averaging the remaining well,” indicating minimal evidence), and special processing or study context (e.g., “Multiplex Overlap Study” = produced under a validation/overlap protocol and potentially not directly comparable to routine measurements); numerous other rare phrases provide similar QC caveats, while null indicates no note recorded (treat as “no explicit qualifier/unknown QC” rather than a measured state); collectively, these values encode measurement-context statuses and thresholds (LOD/LOQ, replicate choice, special studies) that should be used for filtering, weighting, or stratifying analyses, not as numeric magnitudes."
+      ],
+      [
+        "Population Served, estimated",
+        "Entity or Attribute Meaning",
+        "An attribute of the WRRF facility for each observation, this column represents the estimated number of people served by that facility (the service population), describing facility size in persons and providing the denominator for per-capita SARS-CoV-2 load calculations, with the caveat that it is an approximate (often time-invariant) estimate rather than a precise, time-specific count."
+      ],
+      [
+        "Population Served, estimated",
+        "Aggregation and Derivation",
+        "Population Served, estimated is an externally estimated (not lab-measured and not computed from other columns here) fixed attribute for each WRRF, representing the total number of people in the facility’s service area—typically obtained by summing population counts across the sewershed from planning/census sources."
+      ],
+      [
+        "Technology",
+        "Entity or Attribute Meaning",
+        "Technology is an attribute of each wastewater sample measurement event that specifies the laboratory method used to quantify the SARS‑CoV‑2 N1 target—categorized as RT‑qPCR - N1, dPCR‑SC2, or dPCR - N1—and thus provides the methodological context (affecting sensitivity and comparability) for interpreting the reported concentrations and per‑capita loads."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "SBS_Certified_Business_List_20251016",
+    "dataset_description": "List of businesses certified by NYC programs supporting Minority, Women-owned, and Small Construction Enterprises. Each record contains contact, certification, and operational details.",
+    "labels": [
+      [
+        "Account_Number",
+        "Entity or Attribute Meaning",
+        "Account_Number is a numeric, non-null, immutable internal identifier—an attribute that uniquely identifies each Vendor entity in the NYC certified business registry—serving as the primary key to link that vendor’s contact, certification, industry classification, project history, and geographic records across tables, while conveying identity only (not capability or status)."
+      ],
+      [
+        "Vendor_Formal_Name",
+        "Entity or Attribute Meaning",
+        "Vendor_Formal_Name is an attribute of the Vendor entity that records the firm’s official registered legal business name (distinct from any DBA), serving as the canonical identity used in certifications and procurement and as the primary name key—often paired with Account_Number—for matching and linking each vendor to its certifications, industry codes, project history, and contact/geographic details."
+      ],
+      [
+        "Certification",
+        "Value Semantics",
+        "Certification is a categorical, multi-valued status field that lists the NYC SBS program certifications a vendor holds, where each code denotes independent eligibility for a supplier-diversity preference: MBE = Minority-owned Business Enterprise, WBE = Women-owned Business Enterprise, EBE = Emerging Business Enterprise, and LBE = Locally Based Enterprise; values may appear singly (e.g., MBE, WBE) or as comma-separated combinations (e.g., MBE,WBE; MBE,WBE,EBE; WBE,LBE), with combinations indicating the vendor simultaneously holds each listed certification; the field represents binary membership (not levels or rankings), the order of codes has no meaning, there are no special numeric thresholds or sentinel codes, and multi-value entries should be split/normalized and interpreted alongside Certification_Renewal_Date (recertification status) and Ethnicity (diversity reporting)."
+      ],
+      [
+        "Certification_Renewal_Date",
+        "Temporal Scope",
+        "Certification_Renewal_Date is a date-only point-in-time deadline indicating when the vendor’s listed certification(s) expire/are due for renewal; it is a timestamp (not a duration) that bounds the validity of the certified status up to that date, with multi-value entries providing one date per certification type in the same order as the Certification field, and it aligns temporally with Certification (governing eligibility at any procurement date) while remaining independent of establishment or project history dates."
+      ],
+      [
+        "Business_Description",
+        "Entity or Attribute Meaning",
+        "Business_Description is a free-text attribute of the Vendor entity that conveys the real-world business narrative of the firm—its core activities and capabilities, primary services and specializations, operating approaches/methodologies, target markets and client types, and qualitative differentiators—serving as unstructured context that complements NAICS/NIGP classifications and past project records."
+      ],
+      [
+        "Ethnicity",
+        "Value Semantics",
+        "Ethnicity is a discrete MWBE program category indicating the qualifying owner’s ethnic group for certification and reporting: BLACK (Black/African American), HISPANIC (Hispanic/Latino), ASIAN, and NATIVE AMERICAN (American Indian/Alaska Native) denote program-recognized minority groups; NON-MINORITY indicates ownership not in a program-defined minority category (often associated with WBE-only or other non-MBE certifications); “/A” serves as a not-applicable/unknown placeholder, and nulls are missing values; these codes express group membership only (no levels, thresholds, or numeric meaning)."
+      ],
+      [
+        "Date_Of_Establishment",
+        "Temporal Scope",
+        "Date_Of_Establishment records a single point in time—the calendar date the vendor’s legal entity was formed—so it is a static timestamp (not a duration or validity window) that typically serves as the earliest temporal anchor in the row; when normalized from its textual MM/DD/YYYY-like format (with occasional nulls/inconsistencies), it can be aligned with later time-based fields such as Certification_Renewal_Date, PASSPort enrollment, and Date_of_Work_Job_Exp_i to compute firm age and contextualize subsequent certifications and project history."
+      ],
+      [
+        "Aggregate_Bonding_Limit",
+        "Value Representation",
+        "Aggregate_Bonding_Limit is a single monetary amount expressed in U.S. dollars representing a vendor’s total (aggregate) surety bonding capacity, stored as text (object) and typically formatted as whole-dollar integers with thousands separators (e.g., “10,000”, “2,000,000”); valid values are nonnegative currency amounts following a pattern like ^\\s*\\d{1,3}(,\\d{3})*(\\.\\d{2})?$, while blank/NaN denotes unknown (not zero)."
+      ],
+      [
+        "Signatory_To_Union_Contracts",
+        "Value Semantics",
+        "Signatory_To_Union_Contracts is a categorical, often multi-valued free‑text field that lists the specific labor union(s)—typically by name and local number (e.g., IBEW 3/International Brotherhood of Electrical Workers Local 3, Teamsters 282, Steamfitters 638, Iron Workers 580)—with which the vendor has signed collective bargaining agreements; each listed value signifies an active signatory relationship (and thus adherence to the union’s wage/apprenticeship/work-rule requirements), multiple entries (often delimited) indicate coverage by more than one union, spelling/abbreviation variants refer to the same union, numeric tokens denote union local identifiers rather than quantities or levels, there are no special codes or thresholds, and null/blank entries mean union status is unknown or not provided (not necessarily non-union)."
+      ],
+      [
+        "NAICS_Sector",
+        "Relational Context",
+        "NAICS_Sector is the top-level NAICS industry label for each vendor that organizes the dataset by sector; it is hierarchically related to and functionally determined by the vendor’s ID6_digit_NAICS_code (and should be consistent with NAICS_Subsector and NAICS_Title), while the reverse is one-to-many (the sector does not uniquely determine code/subsector/title); within this dataset, acts as a non-null categorical dimension to group and filter vendors—and thereby their certifications, NIGP codes, project histories, capacity signals, and geographies—for sector-level analysis; its relationship to NIGP_codes is complementary (many-to-many) rather than deterministic, and it carries no temporal/ordering dependency."
+      ],
+      [
+        "NAICS_Title",
+        "Entity or Attribute Meaning",
+        "NAICS_Title is an attribute that records the official NAICS industry label for each vendor, indicating the vendor’s primary industry category (as defined by its corresponding 6-digit NAICS code) and describing the core business activities the vendor provides."
+      ],
+      [
+        "Largest_Value_of_Contract",
+        "Aggregation and Derivation",
+        "Derived per vendor (Account_Number): computed as the maximum (peak) dollar amount of any single contract in that vendor’s project history—typically the highest of the Value_of_Contract_Job_Exp_1/2/3, possibly reflecting broader history when provided—stored as a currency-formatted string; it is a max operation (not a sum/average) with aggregation scope “per vendor.”"
+      ],
+      [
+        "Percent_Self_Performed_Job_Exp_1",
+        "Value Representation",
+        "Values are numeric percentages (0–100) stored as float64 without a percent sign, typically whole-number percents (e.g., 0.0, 50.0, 100.0) but any real value in the inclusive range [0,100] is valid; 100 denotes fully self-performed and 0 denotes entirely subcontracted work for the first listed project, with null/NaN allowed when not provided."
+      ],
+      [
+        "Latitude",
+        "Value Representation",
+        "Latitude values are numeric floating-point numbers (float64) expressed in decimal degrees on the WGS84 datum (no degree symbol or N/S suffix), typically recorded to around six decimal places; valid entries are real numbers in the range −90 to 90 that pair with Longitude to define a point, with null/NaN indicating missing data."
+      ],
+      [
+        "Longitude",
+        "Value Representation",
+        "Longitude values are numeric floating-point (float64) coordinates expressed in decimal degrees under the WGS84/EPSG:4326 geographic standard, represented as signed decimals (negative for the Western Hemisphere) with variable precision (typically 5–6 decimal places); valid expressions are any real number in the −180 to 180 domain, with missing entries recorded as null/NaN, and the field must be interpreted in tandem with Latitude as a coordinate pair."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Suitability_of_City-Owned_and_Leased_Property_for_Urban_Agriculture_(LL_48_of_2011)_20251016",
+    "dataset_description": "Assessment of City-owned or leased properties for potential urban agriculture, including parcel details, land use, and environmental data.",
+    "labels": [
+      [
+        "Borough",
+        "Entity or Attribute Meaning",
+        "Borough is a categorical attribute (stored as an integer code) identifying the New York City borough that contains each parcel—i.e., its primary administrative jurisdiction—corresponding to one of the five boroughs (Manhattan, Bronx, Brooklyn, Queens, Staten Island) and used to localize, aggregate, and align parcels with borough-level planning and governance."
+      ],
+      [
+        "Address",
+        "Entity or Attribute Meaning",
+        "Address is an attribute of the parcel entity that records the human‑readable street address (street number/name) of the site, serving as a display/reference locator for outreach and cross-dataset matching, but not as a unique or geometry-defining identifier—which are instead provided by BBL/BIN and coordinates."
+      ],
+      [
+        "Agency",
+        "Entity or Attribute Meaning",
+        "Agency is a categorical/multi-categorical attribute of each parcel record that identifies the city department or public authority with primary ownership, management, or jurisdiction (e.g., PARKS, DCAS, EDUC, DEP, HPD), i.e., the governing entity responsible for approvals, leasing, maintenance, and reuse decisions, thereby describing the parcel’s governance/regulatory pathway relevant to urban agriculture suitability."
+      ],
+      [
+        "Current Uses",
+        "Value Semantics",
+        "Current Uses is a categorical, free‑text descriptor of a parcel’s present, practical function (not its legal zoning), expressed with agency jargon and abbreviations; values represent states of occupancy or assignment such as vacant/open land (e.g., NO USE‑VACANT LAND), parks and natural/open space (e.g., PARK, NATURAL AREA/ETC), community agriculture (COMMUNITY GARDEN), institutional/civic uses (e.g., ELEMENTARY SCHOOL, FIELD OFFICE‑PUBLIC, AGCY OFFICE, BOROUGH OFFICE), transportation/utility corridors (e.g., TRANSIT WAY), parking (e.g., OUTDOOR PKNG‑AGENCY, OUTDOOR PKNG‑CLIENTS), and other commercial/industrial/residential activities; hyphenated suffixes often denote the user group or access context (e.g., ‑PUBLIC, ‑AGENCY, ‑CLIENTS), and semicolon‑separated strings indicate multiple concurrent uses or a use plus an administrative status flag (e.g., FINAL COMMITMNT‑DISP = committed for disposition/transfer); there are no numeric ranges or thresholds—values are textual categories and states—and nulls mean the current use is not recorded/unknown."
+      ],
+      [
+        "Total Area",
+        "Entity or Attribute Meaning",
+        "Total Area is an attribute of each city-owned or city-leased parcel, representing the recorded size of the entire lot (the parcel’s land footprint, in units defined by the data dictionary), describing how much physical ground area the parcel comprises—not necessarily cultivable—and providing a scale indicator for urban-agriculture potential when considered alongside floor area, current use, and zoning."
+      ],
+      [
+        "Total Gross Area Structures",
+        "Aggregation and Derivation",
+        "Computed/aggregated field: for each parcel (BBL), Total Gross Area Structures is calculated as the sum of the gross floor area of all buildings/structures on that parcel (i.e., parcel-level total built floor area, typically in square feet); zeros generally indicate no structures present."
+      ],
+      [
+        "Land Use Category",
+        "Value Semantics",
+        "[PRIOR_KNOWLEDGE] Land Use Category is a NYC PLUTO-style categorical code (integers 1–11, stored numerically) that denotes the parcel’s official land-use class: 1=One & Two Family Buildings, 2=Multi-Family Walk-Up, 3=Multi-Family Elevator, 4=Mixed Residential & Commercial, 5=Commercial & Office, 6=Industrial & Manufacturing, 7=Transportation & Utility, 8=Public Facilities & Institutions, 9=Open Space & Outdoor Recreation, 10=Parking Facilities, 11=Vacant Land; these values are nominal (not ordinal or thresholds), do not indicate intensity or suitability, and null indicates unknown/unclassified in the source."
+      ],
+      [
+        "Community Board",
+        "Relational Context",
+        "Community Board is a coded categorical governance identifier that creates a many-to-one relationship from each parcel to a specific NYC community board; functionally determines Borough (the hundreds digit encodes borough, so Borough is derivable from this field), and is itself derivable from spatial keys (BBL/coordinates) via a spatial join; while it does not determine other neighborhood fields (e.g., Council District, NTA, Census Tract) it serves as a primary grouping key for aggregation, prioritization, and validation within local planning units, and it imposes no ordering or temporal relationship."
+      ],
+      [
+        "Council District",
+        "Relational Context",
+        "Council District is a categorical governance code (1–51) that assigns each parcel to a single City Council jurisdiction; it is derived from spatial location (BBL/coordinates) and should be consistent with Borough, does not functionally determine other parcel attributes, but groups many parcels under one district for rollups, targeting, and equity analysis; it serves as a join key to external Council District boundary/lookup tables (e.g., district polygons, councilmember info) and cross-walks with other district-scale fields (Community Board, NTA, School District) to assess regulatory feasibility and community impact, with any nulls best resolved by spatial overlay against the latest official district map."
+      ],
+      [
+        "Fire Comp",
+        "Relational Context",
+        "Fire Comp is a high-cardinality categorical code for the FDNY engine/ladder company covering a parcel, functionally dependent on the parcel’s location (e.g., BBL/Latitude-Longitude) via FDNY response-district geography; not determine or order other fields, but can be used to group parcels by firefighting coverage and will tend to correlate with other service-area attributes (e.g., Borough, Police Prct, Council District), with nulls indicating unknown/unaligned coverage."
+      ],
+      [
+        "Major Use",
+        "Entity or Attribute Meaning",
+        "Major Use is an attribute of each city-owned or leased parcel that encodes, via domain-specific categorical codes (e.g., V0, G7, O1), the parcel’s primary land-use classification—i.e., the dominant existing or intended function (such as vacant/open land, park/open space, office/commercial, parking/industrial)—providing a concise descriptor of the parcel’s principal use for compatibility, regulatory, and suitability assessment."
+      ],
+      [
+        "Residential Units",
+        "Entity or Attribute Meaning",
+        "Residential Units is an attribute of the parcel entity, recording the integer count of dwelling units currently on the property (0 when non-residential or vacant), describing the parcel’s built residential occupancy/intensity for land-use, zoning, and urban-agriculture suitability analysis."
+      ],
+      [
+        "Ratio Building to Floor Area",
+        "Value Representation",
+        "Ratio Building to Floor Area is a dimensionless, non‑negative floating‑point ratio (float64) stored as plain decimal numbers (e.g., 0.00, 1.55) with no units or separators, representing the magnitude of on‑site building footprint/space relative to reported floor area; it is not normalized (unbounded above—observed 0 to 214.52), frequently equals 0 for parcels with no reported structures/floor area, and valid values follow the schema “real number ≥ 0” (negatives invalid), noting that outliers exist and exact formula components should be confirmed in the data dictionary."
+      ],
+      [
+        "Potential Urban Ag",
+        "Value Semantics",
+        "Potential Urban Ag is a categorical planning-status indicator of each City-owned/leased parcel’s suitability for urban agriculture, where values represent states rather than numeric thresholds: Not Suitable = currently inappropriate for urban agriculture given existing conditions (e.g., use, zoning, environmental constraints); Existing GreenThumb Garden = parcel is already an active urban-agriculture site (treat as an existing asset, not a new candidate); Pending = assessment not yet completed/decision not made; Potentially Suitable 1 and Potentially Suitable 3 = indications of potential suitability with internal tier labels that are not standardized across records (interpret as degrees of promise rather than a definitive rank); NULL/missing = no assessment recorded (treat as Not Assessed/Unknown)."
+      ],
+      [
+        "Date Created",
+        "Temporal Scope",
+        "Date Created is a dataset-wide point-in-time timestamp (03/14/2025) indicating when this snapshot of parcel attributes was generated; it is identical across all rows, represents neither a duration nor a per-parcel validity period, and should be treated as the effective-as-of date for interpreting other fields in each record, not as a record-level creation or last-updated time."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Traffic_Volume_Counts_20251016",
+    "dataset_description": "Automated Traffic Recorder (ATR) data collected by NYC DOT, reporting traffic volume counts for roadways and bridge crossings over different time intervals.",
+    "labels": [
+      [
+        "ID",
+        "Entity or Attribute Meaning",
+        "ID is an attribute (a surrogate key) that uniquely identifies each ATR observation row—i.e., the specific SegmentID–Direction–Date hourly-count record—providing a non-semantic handle for row-level reference, traceability, and stable joins with external metadata, rather than describing any traffic characteristic."
+      ],
+      [
+        "SegmentID",
+        "Relational Context",
+        "SegmentID is the stable location key for an observed road segment, anchoring the segment’s geography (Roadway Name, From, To) to its traffic counts; it repeats across rows to group and organize records into per-segment time series over Date and Direction, and in combination with Date and Direction determines the 24 hourly volume measures for that row; it does not depend on other columns and carries no coordinates itself, but serves as a referential key to join with an external geography/dimension table for spatial context."
+      ],
+      [
+        "Roadway Name",
+        "Entity or Attribute Meaning",
+        "Roadway Name is a categorical attribute that records the human-readable street or road associated with the observed segment, indicating which roadway the traffic-count observation (segment–direction–date event) pertains to; it identifies the corridor name of the segment but is not a unique locator, so it should be used with From/To and SegmentID to pinpoint the exact segment, with awareness of possible naming/casing variations when aggregating or comparing."
+      ],
+      [
+        "From",
+        "Entity or Attribute Meaning",
+        "From is an attribute that names the upstream endpoint (starting boundary, cross street, or landmark) of the roadway segment being observed, and—together with To, Roadway Name, Direction, and SegmentID—defines the specific segment-direction for which hourly vehicle counts are recorded; it is a descriptive label (not a coordinate) indicating where the segment begins."
+      ],
+      [
+        "To",
+        "Entity or Attribute Meaning",
+        "The To column is an attribute of the roadway segment entity, providing the textual name of the segment’s downstream endpoint (terminus street) for the given travel direction; paired with From and SegmentID it defines the specific geographic segment on which the hourly traffic counts for that date are observed, and serves as a categorical label (not a coordinate or metric) for corridor identification and spatial linking/aggregation."
+      ],
+      [
+        "Direction",
+        "Value Semantics",
+        "Direction is a nominal categorical code that identifies the travel orientation of the traffic flow counted on the specified segment and date; core values NB, SB, EB, and WB mean Northbound, Southbound, Eastbound, and Westbound, respectively, while infrequent suffix variants (e.g., NB-SER, WB-SER) denote specialized facilities such as service or frontage lanes in the indicated base direction; the codes are mutually exclusive labels (not numeric, ordered, or thresholded) that determine which side/orientation the 24 hourly vehicle counts refer to, and any non-standard or compound labels should be treated as distinct categories or, if desired for aggregation, mapped to their base cardinal direction according to a domain codebook."
+      ],
+      [
+        "Date",
+        "Temporal Scope",
+        "The Date field denotes the specific calendar day (a day-long period, not a timestamp or duration) that serves as the temporal key for the record, aligning with the given SegmentID and Direction such that each hourly column contains the vehicle count for its respective one-hour interval within that day for that segment-direction."
+      ],
+      [
+        "12-1 AM",
+        "Row Context",
+        "Each row is a single ATR observation for one roadway segment (SegmentID) and travel direction on a specific date; within that row, the 12-1 AM value is the number of vehicles counted by the sensor between 12:00 AM and 1:00 AM for that segment-direction on that date—one of the 24 hourly counts forming the day’s profile—and it is a one-hour aggregate count (not a rate/average and not aggregated across multiple segments or dates)."
+      ],
+      [
+        "1-2AM",
+        "Row Context",
+        "Each row represents one ATR observation day for a specific road segment (SegmentID) and travel direction; within that context, the 1-2AM value is the number of vehicles that passed that segment and direction between 1:00 and 2:00 AM local time on that date—a single-hour total for that specific segment–direction–date (not a speed/average and not aggregated across multiple segments or days)."
+      ],
+      [
+        "2-3AM",
+        "Row Context",
+        "Each row represents a single ATR observation for a specific roadway segment (SegmentID), travel direction, and date; within that context, 2-3AM is the hourly vehicle count recorded between 2:00 and 2:59 AM for that segment-direction on that date—an aggregate within that one-hour window only, not across multiple segments or days."
+      ],
+      [
+        "3-4AM",
+        "Row Context",
+        "Each row is one observation for a specific road segment (SegmentID), travel direction, and date; within that context, the 3-4AM value is the total number of vehicles counted by the ATR on that segment and direction between 3:00 and 3:59 AM of that date—an hourly aggregate flow count for that single segment-direction-date instance (not a speed or multi-segment measure)."
+      ],
+      [
+        "4-5AM",
+        "Row Context",
+        "Each row represents one ATR observation day for a specific road segment (SegmentID with Roadway Name/From/To) and travel direction; within that context, the 4-5AM value is the number of vehicles that passed the sensor between 4:00 and 4:59 AM on that date for that segment and direction—an hourly aggregate count for that single segment–direction–date (possibly null if the hour wasn’t observed), not a measure of speed or travel time."
+      ],
+      [
+        "5-6AM",
+        "Row Context",
+        "Each row is a segment–direction–date observation from an ATR sensor, and the 5-6AM value is the total number of vehicles that passed that segment in that direction between 5:00 and 5:59 AM on that date—an hourly aggregate count specific to this single segment–direction–date instance (part of the row’s 24-hour diurnal profile, not a speed or time measure)."
+      ],
+      [
+        "6-7AM",
+        "Row Context",
+        "Each row captures one ATR traffic-volume observation for a specific road segment (SegmentID with Roadway Name/From/To), travel direction, and date; within that row, 6-7AM is the number of vehicles recorded on that segment and direction between 6:00–6:59 AM on that date—an hourly count for that single segment–direction–date (one of the 24 within-day measures), not an average or a rollup across multiple segments or days."
+      ],
+      [
+        "7-8AM",
+        "Row Context",
+        "Each row is a single observation day for a specific road segment (SegmentID) and travel direction; within that context, 7-8AM is the number of vehicles counted by the ATR at that segment-direction between 7:00 and 7:59 AM on that date—a single hourly count (an aggregate over that one-hour window), not speed or a multi-day/multi-segment aggregate."
+      ]
+    ]
+  },
+  {
+    "dataset_name": "Tax_Lien_Sale_Lists_20251005",
+    "dataset_description": "Properties with tax and/or water liens potentially eligible for inclusion in the next lien sale.",
+    "labels": [
+      [
+        "Month",
+        "Temporal Scope",
+        "Month is a categorical month-year period (MM/YYYY) representing the closed calendar month in which the parcel’s lien notice stage was recorded/in effect; it is a period label rather than a point-in-time timestamp or multi-month duration, and it temporally anchors the record’s status so that, together with Cycle, it places the parcel at a specific step of the notice process within that month (day-level timing not implied)."
+      ],
+      [
+        "Cycle",
+        "Entity or Attribute Meaning",
+        "Cycle is a categorical, ordinal attribute of the parcel-lien record that represents the real-world notice stage in the property’s tax/water delinquency process for the given Month, describing how far the parcel has progressed toward lien sale and indicating its current urgency for action."
+      ],
+      [
+        "Borough",
+        "Entity or Attribute Meaning",
+        "The Borough column is an attribute of the parcel entity that encodes—via one of five integer codes mapped to NYC borough names—the administrative borough in which the property is located, providing the core geographic context for segmentation, analysis, and eligibility determinations in conjunction with Community Board and Council District."
+      ],
+      [
+        "Block",
+        "Entity or Attribute Meaning",
+        "Block is an identifier attribute: the NYC tax-map block number within the specified Borough that, combined with Lot (and Borough), forms the parcel’s unique BBL used to locate and link each property in the lien-sale records."
+      ],
+      [
+        "Lot",
+        "Entity or Attribute Meaning",
+        "Lot represents the numeric lot identifier of a NYC property parcel within its tax Block—an attribute (categorical code) of the parcel entity that, together with Block, forms the composite parcel ID used to uniquely anchor lien records, and specify which specific lot within the block the record describes."
+      ],
+      [
+        "Tax Class Code",
+        "Value Semantics",
+        "[PRIOR_KNOWLEDGE] Tax Class Code is a categorical label for the NYC property tax regime applied to each parcel: 1 = Class 1 (one- to three-family homes and certain small residential parcels/related vacant land), 2 = Class 2 (other residential properties such as buildings with four or more units, most condos and co-ops), and 4 = Class 4 (commercial/industrial and other nonresidential properties); these are policy-defined categories that govern assessment and lien rules, represent states rather than numeric magnitudes or ordered levels, have no special thresholds beyond the discrete codes, and in this dataset only codes 1, 2, and 4 appear."
+      ],
+      [
+        "Building Class",
+        "Value Semantics",
+        "[PRIOR_KNOWLEDGE] Building Class encodes the NYC Department of Finance building-classification for a parcel as a categorical code in which the leading letter signals the broad property type and the following character(s) refine the subtype (not an ordinal scale): letters commonly map to families such as A=one‑family dwellings, B=two‑family dwellings (e.g., B1/B2/B3 are two‑family variants), C=walk‑up apartments (e.g., C0/C3/C7 are walk‑up subtypes, with “0” often serving as a generic/unspecified catch‑all—C0 is the most frequent here), D=elevator apartments, E=warehouses, F=factory/industrial (e.g., F4 is a factory subtype), K=stores/retail, O=office buildings, R=condominiums (R* codes denote condo buildings/units/common elements where the second character indicates the underlying use—e.g., RB commonly represents a condo subtype tied to commercial/office), V=vacant land (e.g., V0), and less common letters (e.g., N*) cover institutional/home/healthcare uses (e.g., N4); values represent building/use categories rather than levels or thresholds, “0” indicates a generic/unspecified subtype within a class, and a null value means the building type is unknown—use the official DOF building-class lookup to map each code to its descriptive label for analysis and lien-eligibility interpretation."
+      ],
+      [
+        "Community Board",
+        "Relational Context",
+        "Community Board is a categorical governance code (e.g., 318, 412) that groups parcels into NYC community board/district areas; it is effectively determined by parcel geography (Borough + Block/Lot/address) and remains constant across Month/Cycle, implicitly encodes and should agree with the Borough (hierarchical relationship), but does not determine unique parcels or Council Districts (which intersect rather than nest); operationally it organizes records for neighborhood-level eligibility screening and analysis, there are missing values."
+      ],
+      [
+        "Council District",
+        "Relational Context",
+        "Council District is a categorical code (1–51) that, for each parcel record, identifies the NYC Council electoral district containing the parcel, thereby creating a many-to-one grouping of parcels by district; it serves as a natural join key to external Council District reference tables or boundary shapefiles (to append district names, representatives, policy attributes), functionally determines Borough because districts are contained within a single borough (but neither determines nor is uniquely determined by Community Board), is effectively derived from parcel location (via BBL/address geocoding) and should be consistent across notice cycles except when redistricting alters boundaries, and is used to segment and aggregate lien candidates by district rather than to order records or perform numeric calculations, with missing values and float typing."
+      ],
+      [
+        "House Number",
+        "Entity or Attribute Meaning",
+        "House Number is an attribute of the property parcel, representing the street-address number (often alphanumeric, e.g., 95-08 or 12A) that identifies the specific building location on a street; stored as a categorical string, it combines with Street Name and Zip Code for geocoding and external matching, but does not define the parcel’s core identity (which is Block + Lot)."
+      ],
+      [
+        "Street Name",
+        "Entity or Attribute Meaning",
+        "Street Name is an attribute representing the street component of each parcel’s physical address (the named roadway the property fronts), used in combination with House Number, Borough, and Zip Code to identify and geocode the parcel for lien-sale screening and geographic analyses; it is a high-cardinality categorical field that aids street-level segmentation and joins but is not a unique identifier."
+      ],
+      [
+        "Zip Code",
+        "Value Representation",
+        "USPS 5‑digit ZIP Code: values represent U.S. postal codes for NYC addresses and should be stored as fixed-length, zero‑padded strings matching the pattern ^\\\\d{5}$ (USPS standard, no ZIP+4 or hyphens); although the current data type is float64 (e.g., 11207.0), treated as categorical (not for arithmetic), allow null/NaN for missing, and generally fall within NYC ranges (100xx–116xx)."
+      ],
+      [
+        "Water Debt Only",
+        "Value Semantics",
+        "Water Debt Only is a two-value categorical indicator with values YES and NO, where YES signifies that the parcel’s recorded lien consists exclusively of water utility debt and NO signifies that the lien includes tax or other non‑water charges (i.e., mixed or non‑water liabilities); there are no other codes or thresholds, and the values represent mutually exclusive lien-composition states used for eligibility/risk filtering and segmentation, so they should be treated as a boolean-like category with standardized casing (YES/NO) rather than a generic debt flag."
+      ]
+    ]
+  }
+]
