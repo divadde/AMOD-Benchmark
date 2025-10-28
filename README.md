@@ -1,13 +1,13 @@
-# AMOD Benchmark — Attribute-Meaning Ontology Discovery
+# ABCU Benchmark — Aspect-Based Column Understanding
 
-**AMOD (Attribute-Meaning Ontology Discovery)** is a benchmark created for the homonymous paper introducing this novel task.  
-AMOD focuses on the **semantic interpretation of table attributes**, aiming to uncover what each column represents in the real world and how its values are expressed, aggregated, or related to others.
+**ABCU (Aspect-Based Column Understanding)** is a benchmark created for the homonymous paper introducing this novel task.  
+ABCU focuses on the **semantic interpretation of table attributes**, aiming to uncover what each column represents in the real world and how its values are expressed, aggregated, or related to others.
 
 ---
 
 ## 🧩 Overview
 
-Unlike traditional column-type annotation tasks, AMOD provides **fine-grained semantic statements** for each attribute, describing its meaning across multiple conceptual facets.  
+Unlike traditional column-type annotation tasks, ABCU provides **fine-grained semantic statements** for each attribute, describing its meaning across multiple conceptual facets.  
 All annotations have been **produced and reviewed by human annotators**, ensuring semantic precision and interpretability.
 
 The benchmark allows researchers to evaluate and develop systems capable of generating or verifying human-understandable statements about table attributes — a core step for data understanding and schema-level AI reasoning.
@@ -25,11 +25,11 @@ v2_final_attributes_json.json              # human-annotated benchmark data
 
 ## 🏙️ Data Source
 
-All datasets used in AMOD are derived from the **NYC Open Data** portal:  
+All datasets used in ABCU are derived from the **NYC Open Data** portal:  
 👉 https://opendata.cityofnewyork.us/  
 
 A curated subset of heterogeneous municipal datasets was selected to ensure domain diversity, schema complexity, and richness of attribute semantics. 
-The subset of AMOD can be found here:
+The subset of ABCU can be found here:
 👉 https://drive.google.com/drive/folders/1MbaiZf2ucIlIY9taCn3F6xwIq8_iOGKf?usp=drive_link
 
 ---
@@ -96,7 +96,7 @@ All statements underwent review for **semantic correctness, clarity, and groundi
 
 ## 🎯 Intended Use
 
-AMOD is intended for evaluating and developing systems that perform:
+ABCU is intended for evaluating and developing systems that perform:
 - column-level meaning discovery,
 - ontology-based reasoning on tabular data,
 - LLM-based hypothesis generation and validation (e.g., multi-agent reasoning systems).
@@ -106,9 +106,4 @@ It supports research in:
 - schema mapping and ontology alignment,  
 - explainable AI for data profiling and cataloging.
 
----
-
-## 🙏 Acknowledgements
-
-We acknowledge the **City of New York** for providing open public data through the [NYC Open Data](https://opendata.cityofnewyork.us/) portal.
 
